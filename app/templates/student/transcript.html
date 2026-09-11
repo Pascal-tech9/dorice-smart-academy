@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+
+{% block title %}Transcript — {{ student.full_name }}{% endblock %}
+
+{% block content %}
+<section class="dsa-section">
+  <div class="container">
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <a href="{{ url_for('student.dashboard') }}" class="btn dsa-btn-ghost">← Back</a>
+      <button class="btn dsa-btn-primary" onclick="window.print()">🖨️ Print</button>
+    </div>
+
+    <!-- Official MoE-style header -->
+    <div class="dsa-transcript-head text-center mb-4">
+      <div class="dsa-transcript-flag">
+        <span style="font-size:11px; letter-spacing:.1em;">REPUBLIC OF KENYA</span>
+      </div>
+      <h4 class="dsa-transcript-moe mt-2">
+        MINISTRY OF EDUCATION SCIENCE AND TECHNOLOGY
+      </h4>
+      <h3 class="dsa-transcript-type">
+        SUMMATIVE ASSESSMENT REPORT FOR
+        {% if transcript.phase == "Pre-Primary" %}PRE-PRIMARY SCHOOL
+        {% elif transcript.phase == "Lower Primary" %}LOWER PRIMARY SCHOOL
+        {% else %}JUNIOR SCHOOL
+        {% endif %}
+      </h3>
+      <h2 class="dsa-transcript-school">{{ school_name|upper }} — {{ transcript.term|upper }}, {{ transcript.year }}.</h2>
+    </div>
+
+    <!-- Learner details -->
+    <div class="dsa-transcript-meta">
+      <div><strong>Learner's name:</strong> {{ transcript.learner_name }}</div>
+      <div><strong>Assessment #:</strong> {{ transcript.assessment_number or "—" }}</div>
+      <div><strong>UPI:</strong> {{ transcript.upi or "—" }}</div>
+      <div><strong>Grade:</strong> {{ transcript.grade }}</div>
+    </div>
+
+    <!-- Subject table -->
+    <table class="table table-bordered dsa-transcript-table mt-3">
+      <thead>
+        <tr class="text-center">
+          <th>Learning area</th>
+          <th>Entry 1</th>
+          <th>Rubric</th>
+          <th>Mid-Term</th>
+          <th>Rubric</th>
+          <th>End-Term</th>
+          <th>Rubric</th>
+          <th>Performance Level</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for line in transcript.lines.order_by('order').all() %}
+          <tr>
+            <td><strong>{{ line.subject }}</strong></td>
+            <td class="text-center">{{ line.entry_score or "" }}</td>
+            <td class="text-center">{{ line.entry_score | rubric }}</td>
+            <td class="text-center">{{ line.mid_score or "" }}</td>
+            <td class="text-center">{{ line.mid_score | rubric }}</td>
+            <td class="text-center">{{ line.end_score or "" }}</td>
+            <td class="text-center">{{ line.end_score | rubric }}</td>
+            <td class="text-center"><strong>{{ line.performance_level or "" }}</strong></td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <!-- Totals -->
+    <div class="dsa-transcript-totals">
+      <span><strong>Total marks:</strong> {{ transcript.total_marks or "—" }} out of {{ transcript.total_out_of or "—" }}</span>
+      <span><strong>Position:</strong> {{ transcript.position or "—" }} out of {{ transcript.out_of or "—" }} learners</span>
+    </div>
+
+    <!-- Comments -->
+    <div class="dsa-transcript-comments mt-4">
+      <h4>Grade facilitator's comments on competencies achieved:</h4>
+      <p>{{ transcript.grade_facilitator_comments or "—" }}</p>
+    </div>
+
+    <div class="dsa-transcript-comments">
+      <h4>Learner's general performance level:</h4>
+      <p><strong>{{ transcript.general_performance or "—" }}</strong></p>
+    </div>
+
+    <!-- Signatures -->
+    <div class="dsa-transcript-sigs mt-4">
+      <div>
+        <div class="dsa-sig-line">_________________________</div>
+        <small>Grade facilitator's signature<br>({{ transcript.facilitator_signature or "—" }})</small>
+      </div>
+      <div>
+        <div class="dsa-sig-line">_________________________</div>
+        <small>Head of institution signature<br>({{ transcript.head_signature or "—" }})</small>
+      </div>
+    </div>
+
+    <div class="dsa-transcript-dates mt-3">
+      <span>Closing date: <strong>{{ transcript.closing_date or "—" }}</strong></span>
+      <span>Next term begins: <strong>{{ transcript.next_term_begins or "—" }}</strong></span>
+    </div>
+
+  </div>
+</section>
+{% endblock %}

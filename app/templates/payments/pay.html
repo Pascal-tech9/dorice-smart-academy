@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+
+{% block title %}Pay with M-Pesa — {{ school_name }}{% endblock %}
+
+{% block content %}
+
+<section class="dsa-section">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-lg-7">
+        <div class="dsa-card dsa-pay-card">
+          <div class="dsa-pay-eyebrow">M-Pesa Paybill</div>
+          <h1 class="dsa-h1 mt-2">Pay {{ paybill }} · Account {{ account_number }}</h1>
+          <p class="dsa-lead mt-2">
+            Pay your term fees by M-Pesa. We pre-filled the student details
+            from your account — confirm the amount, enter your phone, and
+            approve the prompt on your phone.
+          </p>
+
+          {% if simulated %}
+          <div class="alert alert-info">
+            <strong>Simulator mode:</strong> M-Pesa Daraja credentials aren't
+            configured on this server, so we're using a local simulator.
+            The full flow (form, prompt, success) works the same way.
+          </div>
+          {% endif %}
+
+          <form method="post" novalidate class="mt-3">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+            <div class="row g-3">
+              <div class="col-md-7">
+                <label class="form-label">Student name</label>
+                <input type="text" name="full_name" class="form-control"
+                       value="{{ form.full_name.data or '' }}" readonly>
+                <div class="dsa-small-note">From your parent account.</div>
+              </div>
+              <div class="col-md-5">
+                <label class="form-label">Grade</label>
+                <input type="text" name="grade" class="form-control"
+                       value="{{ form.grade.data or '' }}" readonly>
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label">What you're paying for</label>
+                <input type="text" name="purpose" class="form-control"
+                       value="{{ form.purpose.data or 'Term fees' }}" required>
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label">Amount (KES)</label>
+                <div class="input-group">
+                  <span class="input-group-text">KES</span>
+                  <input type="number" name="amount" class="form-control"
+                         value="{{ form.amount.data or 5000 }}" min="1" max="500000" required>
+                </div>
+              </div>
+
+              <div class="col-md-12">
+                <label class="form-label">M-Pesa phone number</label>
+                <input type="tel" name="phone" class="form-control"
+                       value="{{ form.phone.data or '' }}"
+                       placeholder="0712 345 678" required>
+                <div class="dsa-small-note">
+                  You'll get an M-Pesa prompt on this number asking you to
+                  enter your PIN.
+                </div>
+                {% for e in form.phone.errors %}
+                  <div class="dsa-field-error">{{ e }}</div>
+                {% endfor %}
+              </div>
+            </div>
+
+            <div class="d-flex gap-2 mt-4 flex-wrap">
+              <button type="submit" class="btn dsa-btn-primary">
+                Pay with M-Pesa
+              </button>
+              <a class="btn dsa-btn-ghost"
+                 href="{{ url_for('payments.manual') }}">
+                Already paid at the till
+              </a>
+              <a class="btn dsa-btn-ghost"
+                 href="{{ url_for('payments.sim_guide') }}">
+                📄 Print SIM toolkit guide
+              </a>
+            </div>
+          </form>
+
+          <hr class="my-4">
+
+          <div class="row g-3">
+            <div class="col-md-6">
+              <h4 class="dsa-h4">How it works</h4>
+              <ol class="dsa-pay-steps-list">
+                <li>Confirm the student name and grade (already filled in).</li>
+                <li>Enter the amount and your M-Pesa phone number.</li>
+                <li>Click <strong>Pay with M-Pesa</strong> — an M-Pesa prompt
+                    fires on your phone within seconds.</li>
+                <li>Enter your M-Pesa PIN to authorise the payment.</li>
+                <li>We unlock your results portal automatically when the
+                    payment confirms.</li>
+              </ol>
+            </div>
+            <div class="col-md-6">
+              <h4 class="dsa-h4">Paying directly to the till</h4>
+              <p>You can also pay directly to:</p>
+              <ul class="dsa-till-box">
+                <li><strong>Paybill:</strong> {{ paybill }}</li>
+                <li><strong>Account number:</strong> {{ account_number }}</li>
+                <li><strong>Name on statement:</strong> Student name + grade</li>
+              </ul>
+              <p class="dsa-small-note">
+                Once paid, <a href="{{ url_for('payments.manual') }}">submit your
+                M-Pesa confirmation code</a> and the school office will
+                verify and unlock your results.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% endblock %}

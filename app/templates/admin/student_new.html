@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block title %}Add student — Admin{% endblock %}
+
+{% block content %}
+<section class="dsa-section">
+  <div class="container" style="max-width: 720px;">
+    <a href="{{ url_for('admin.students') }}" class="btn dsa-btn-ghost mb-3">← Students</a>
+    <h1 class="dsa-h1">Add a new student</h1>
+    <p class="dsa-section-sub">
+      Use this when a student joins mid-term. They get a default 4-digit
+      PIN that you can change below.
+    </p>
+
+    <form method="post" novalidate class="dsa-card">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+      <div class="row g-3">
+        <div class="col-md-4">
+          <label class="form-label">Admission number</label>
+          <input type="text" name="admission_number" class="form-control"
+                 value="{{ form_adm }}" placeholder="DSA500" required
+                 pattern="DSA[0-9]{3,}" title="DSA followed by 3+ digits">
+        </div>
+        <div class="col-md-8">
+          <label class="form-label">Full name</label>
+          <input type="text" name="full_name" class="form-control"
+                 value="{{ form_name }}" placeholder="e.g. JANE ATIENO" required>
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label">Grade</label>
+          <select name="grade" class="form-select" required>
+            <option value="">— choose —</option>
+            {% for g in all_grades %}
+              <option value="{{ g }}" {% if form_grade==g %}selected{% endif %}>{{ g }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-md-3">
+          <label class="form-label">Fees balance (KES)</label>
+          <input type="number" name="fees_balance" class="form-control" value="0" min="0" max="500000">
+        </div>
+        <div class="col-md-3 d-flex align-items-end">
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" name="fees_cleared" value="y" id="cleared">
+            <label class="form-check-label" for="cleared">Fees cleared</label>
+          </div>
+        </div>
+
+        <div class="col-md-4">
+          <label class="form-label">4-digit PIN</label>
+          <input type="text" name="pin" class="form-control" value="1234"
+                 maxlength="4" pattern="[0-9]{4}" required
+                 title="4 digits. Share this with the student for their first login.">
+          <div class="dsa-small-note">Default 1234. Change it after the student signs in.</div>
+        </div>
+      </div>
+
+      <div class="d-flex gap-2 mt-4">
+        <button type="submit" class="btn dsa-btn-primary">Create student</button>
+        <a class="btn dsa-btn-ghost" href="{{ url_for('admin.students') }}">Cancel</a>
+      </div>
+    </form>
+  </div>
+</section>
+{% endblock %}

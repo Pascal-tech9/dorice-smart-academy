@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="dsa-section">
+  <div class="container text-center py-5">
+    <h1 class="dsa-h1">File too large</h1>
+    <p class="dsa-section-sub">Uploaded files must be 8MB or smaller. Please compress and try again.</p>
+    <a class="btn dsa-btn-primary mt-3" href="{{ url_for('main.index') }}">Back to home</a>
+  </div>
+</section>
+{% endblock %}

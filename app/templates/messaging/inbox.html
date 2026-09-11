@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block title %}Messages — {{ school_name }}{% endblock %}
+
+{% block content %}
+<section class="dsa-section">
+  <div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <div>
+        <span class="dsa-eyebrow">Support</span>
+        <h1 class="dsa-h1 mt-2">Your messages</h1>
+      </div>
+      <a class="btn dsa-btn-primary" href="{{ url_for('messaging.new_thread') }}">
+        ✉️ New message
+      </a>
+    </div>
+
+    {% if threads %}
+      <div class="list-group">
+        {% for t in threads %}
+          <a href="{{ url_for('messaging.thread', message_id=t.id) }}"
+             class="list-group-item list-group-item-action {% if t._unread %}dsa-msg-unread{% endif %}">
+            <div class="d-flex justify-content-between">
+              <strong>{{ t.subject or '(no subject)' }}</strong>
+              <small class="text-muted">{{ t.created_at.strftime('%Y-%m-%d %H:%M') }}</small>
+            </div>
+            <div class="small text-muted">{{ t.body[:120] }}{% if t.body|length > 120 %}…{% endif %}</div>
+            {% if t._unread %}
+              <span class="badge bg-warning">Unread</span>
+            {% endif %}
+          </a>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="dsa-card text-center py-5">
+        <p class="text-muted">No messages yet. Have a question? Send one to the school office.</p>
+        <a class="btn dsa-btn-primary" href="{{ url_for('messaging.new_thread') }}">
+          ✉️ Send your first message
+        </a>
+      </div>
+    {% endif %}
+  </div>
+</section>
+
+<style>
+.dsa-msg-unread { background: #FFF8E3; border-left: 3px solid var(--gold); }
+</style>
+{% endblock %}

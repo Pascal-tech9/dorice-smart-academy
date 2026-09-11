@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+
+{% block title %}ICT Administrator — {{ school_name }}{% endblock %}
+
+{% block content %}
+<section class="dsa-section">
+  <div class="container">
+    <div class="row align-items-center g-5">
+      <div class="col-md-5 text-center">
+        <a href="{{ url_for('static', filename='img/staff/director.jpg') }}" target="_blank">
+          <img src="{{ url_for('static', filename='img/staff/director.jpg') }}"
+               alt="Mrs. D. A. Chapia — ICT Administrator"
+               class="img-fluid"
+               style="max-height: 460px; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,.15); cursor: zoom-in;">
+        </a>
+        <p class="small text-muted mt-2">Click photo to view full size</p>
+      </div>
+      <div class="col-md-7">
+        <span class="dsa-eyebrow">ICT Lead · School Office</span>
+        <h1 class="dsa-h1 mt-2">Mrs. D. A. Chapia</h1>
+        <p class="dsa-section-sub">
+          Director / ICT Administrator · Dorice Smart Academy
+        </p>
+        <p class="mt-3">
+          Mrs. Chapia runs the school office and the digital portal.
+          She approves new parent signups, manages student records and
+          fees, publishes CBC term reports, and replies to parent
+          questions through the messaging system.
+        </p>
+        <ul class="list-unstyled small mt-3">
+          <li><strong>School email:</strong>
+            <a href="mailto:Doricesmartprimaryschool89@gmail.com">Doricesmartprimaryschool89@gmail.com</a>
+          </li>
+          <li><strong>Office phone:</strong> 0115 622615</li>
+          <li><strong>Office hours:</strong> Mon – Fri, 7:00 am – 4:30 pm</li>
+        </ul>
+      </div>
+    </div>
+
+    <hr class="my-5">
+
+    <h2 class="dsa-h2">What the admin can do here</h2>
+    <p class="dsa-section-sub">Everything below is what Mrs. Chapia does day-to-day through the web portal.</p>
+
+    <div class="row g-3 mt-2">
+      <div class="col-md-6">
+        <div class="dsa-card">
+          <h3 class="dsa-h4">📊 Update fees & admit students (Excel)</h3>
+          <p class="small">Download the current student list, update fees balances or admit new students in Excel, then upload it back. Dry-run first to preview changes.</p>
+          <a class="btn dsa-btn-primary w-100"
+             href="{{ url_for('admin.excel_export_students') }}" target="_blank">
+            ⬇️ Download dorice-students-template.xlsx
+          </a>
+          <p class="small text-muted mt-2">
+            Columns: <code>admission_number, full_name, grade,
+            fees_cleared, fees_balance, parent_email, is_active</code>
+          </p>
+        </div>
+      </div>
+
+      <div class="col-md-6">
+        <div class="dsa-card">
+          <h3 class="dsa-h4">📄 Printable M-Pesa guide for parents</h3>
+          <p class="small">A 1-page PDF that walks parents through paying to paybill <strong>400222</strong>, account <strong>369369</strong> on their phone. Print and hand out at parent meetings.</p>
+          <a class="btn dsa-btn-ghost w-100"
+             href="{{ url_for('payments.sim_guide') }}" target="_blank">
+            📄 Open printable SIM toolkit guide
+          </a>
+        </div>
+      </div>
+
+      <div class="col-md-6">
+        <div class="dsa-card">
+          <h3 class="dsa-h4">📚 CBC summative assessment reports</h3>
+          <p class="small">Three report variants match the official MoE templates:</p>
+          <ul class="small">
+            <li><strong>Pre-Primary</strong> — Playgroup, PP1, PP2</li>
+            <li><strong>Lower Primary</strong> — Grade 1, 2, 3</li>
+            <li><strong>Junior School</strong> — Grade 4 – 9</li>
+          </ul>
+          <p class="small text-muted">Each subject scored 1–4 across Entry 1 / Mid-Term / End-Term.</p>
+        </div>
+      </div>
+
+      <div class="col-md-6">
+        <div class="dsa-card">
+          <h3 class="dsa-h4">💬 Parent messages</h3>
+          <p class="small">Parents can ask questions from any page via the "Message the office" link. The admin sees the thread, replies, and the parent is notified by email.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="dsa-card mt-4">
+      <h3 class="dsa-h4">🔐 Security baseline (built into the platform)</h3>
+      <ul class="small mb-0">
+        <li><strong>School email gate:</strong> only <code>Doricesmartprimaryschool89@gmail.com</code> can access <code>/admin/*</code></li>
+        <li><strong>File upload firewall:</strong> magic bytes + extension whitelist. Blocks <code>.exe</code>, <code>.php</code>, <code>.svg</code>, scripts, etc.</li>
+        <li><strong>Rate limiting:</strong> 10 student logins/min, 30 messages/min per IP</li>
+        <li><strong>Email verification:</strong> new parents are matched against the official roster before ICT approval</li>
+        <li><strong>Audit log:</strong> every admin action is recorded with who, what, when, IP</li>
+        <li><strong>HSTS + CSP + secure cookies</strong> in production</li>
+      </ul>
+    </div>
+  </div>
+</section>
+{% endblock %}

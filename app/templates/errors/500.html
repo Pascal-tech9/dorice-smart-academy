@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="dsa-section">
+  <div class="container text-center py-5">
+    <h1 class="dsa-h1">500 — Server Error</h1>
+    <p class="dsa-section-sub">
+      Something went wrong on our end. Our team has been notified.
+      Please try again in a moment.
+    </p>
+    <a class="btn dsa-btn-primary mt-3" href="{{ url_for('main.index') }}">Back to home</a>
+  </div>
+</section>
+{% endblock %}

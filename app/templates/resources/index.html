@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block content %}
+
+<section class="dsa-section">
+  <div class="container">
+    <div class="dsa-section-head">
+      <span class="dsa-eyebrow">Modern Notes</span>
+      <h1 class="dsa-h1">Learning Resources</h1>
+      <p class="dsa-section-sub">
+        Curated notes and workbooks for Dorice Smart Academy learners.
+        Junior Secondary (Gr 7–9) Computer Studies and pre-technical
+        studies have their own dedicated section.
+      </p>
+    </div>
+
+    {# ---- Junior Secondary Computer Studies highlight ---- #}
+    <div class="dsa-card dsa-js-callout mb-4">
+      <div class="row align-items-center g-3">
+        <div class="col-md-8">
+          <span class="dsa-eyebrow dsa-eyebrow-gold">Junior Secondary Spotlight</span>
+          <h2 class="dsa-h2 mt-2">Computer Studies (Gr 7–9) &amp; Pre-technical</h2>
+          <p class="mb-0">
+            <strong>{{ js_comp_count }}</strong> notes covering computing foundations,
+            word processing, programming logic, web basics, online safety, and
+            pre-technical studies. Aligned to the CBC pathway.
+          </p>
+        </div>
+        <div class="col-md-4 text-md-end">
+          <a class="btn dsa-btn-primary" href="#js-section">Jump to section ↓</a>
+        </div>
+      </div>
+    </div>
+
+    {# ---- Grouped notes ---- #}
+    {% for group in groups %}
+      <div class="dsa-resource-group mb-5" id="{% if group.name.startswith('Junior Secondary') %}js-section{% endif %}">
+        <div class="dsa-group-head">
+          <h2 class="dsa-h2">{{ group.name }}</h2>
+          <span class="dsa-group-count">{{ group.notes|length }} note{{ '' if group.notes|length == 1 else 's' }}</span>
+        </div>
+
+        <div class="row g-3">
+          {% for n in group.notes %}
+            <div class="col-md-6 col-lg-4">
+              <div class="dsa-card dsa-note-card h-100">
+                <div class="d-flex justify-content-between align-items-start">
+                  <span class="dsa-note-subject">{{ n.subject }}</span>
+                  {% if n.new %}<span class="badge bg-warning text-dark">New</span>{% endif %}
+                </div>
+                <h3 class="dsa-h3 mt-2">{{ n.title }}</h3>
+                <p class="dsa-note-summary">{{ n.summary }}</p>
+                <a class="dsa-note-cta" href="{{ url_for('static', filename=n.file) }}">
+                  Open note →
+                </a>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    {% endfor %}
+
+  </div>
+</section>
+
+{% endblock %}

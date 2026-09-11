@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+{# ---------------- HERO ---------------- #}
+<section class="dsa-hero">
+  <div class="container">
+    <div class="row align-items-center g-5">
+      <div class="col-lg-7">
+        <span class="dsa-eyebrow">Lumakanda · Kakamega County · PP1 – Grade 9</span>
+        <h1 class="dsa-h1">A steady place to learn, grow, and belong.</h1>
+        <p class="dsa-lead">
+          Dorice Smart Academy serves families in Lumakanda with small classes,
+          a full CBC curriculum, and a campus built around care — from first
+          steps in nursery to Grade 9 and Junior Secondary.
+        </p>
+        <div class="d-flex flex-wrap gap-2">
+          <a class="btn dsa-btn-primary" href="{{ url_for('admissions.index') }}">Start admissions</a>
+          <a class="btn dsa-btn-ghost" href="{{ url_for('resources.index') }}">Learning resources</a>
+        </div>
+      </div>
+      <div class="col-lg-5">
+        <div class="dsa-hero-art">
+          <img src="{{ url_for('static', filename='img/hero.jpg') }}"
+               alt="Dorice Smart Academy campus"
+               onerror="this.style.display='none'; this.parentElement.classList.add('img-missing');">
+          <div class="dsa-art-label">assets/img/hero.jpg</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+{# ---------------- DAILY PULSE + 2026 CALENDAR ---------------- #}
+<section class="dsa-section">
+  <div class="container">
+    <div class="row g-4">
+      {# Daily Pulse sidebar #}
+      <div class="col-lg-4">
+        <div class="dsa-card dsa-pulse">
+          <div class="dsa-pulse-head">
+            <span class="dsa-pulse-dot"></span>
+            <span>Daily Pulse</span>
+          </div>
+          <h3 class="dsa-h3">Gate hours</h3>
+          <div class="dsa-pulse-hours">
+            <span class="dsa-pulse-time">{{ gate_open }}</span>
+            <span class="dsa-pulse-dash">—</span>
+            <span class="dsa-pulse-time">{{ gate_close }}</span>
+          </div>
+          <p class="dsa-pulse-sub">Monday – Friday</p>
+
+          <h4 class="dsa-h4 mt-4">Routine</h4>
+          <ul class="dsa-routine">
+            {% for r in routine %}
+              <li><span class="r-time">{{ r.time }}</span><span class="r-label">{{ r.label }}</span></li>
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+
+      {# Calendar table #}
+      <div class="col-lg-8">
+        <div class="dsa-card">
+          <span class="dsa-eyebrow">2026 School Calendar</span>
+          <h2 class="dsa-h2 mt-2">Three terms, in line with Kenya's national school calendar.</h2>
+          <div class="table-responsive mt-3">
+            <table class="table dsa-table align-middle">
+              <thead>
+                <tr>
+                  <th scope="col">Term</th>
+                  <th scope="col">Window</th>
+                  <th scope="col">Opens</th>
+                  <th scope="col">Closes</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for row in calendar_2026 %}
+                <tr>
+                  <td><strong>{{ row.term }}</strong></td>
+                  <td>{{ row.window }}</td>
+                  <td>{{ row.opens }}</td>
+                  <td>{{ row.closes }}</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          <p class="dsa-small-note">Exact dates are set by the Ministry of Education each year and confirmed by the school office.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+{# ---------------- GALLERY ---------------- #}
+<section class="dsa-section dsa-section-dim">
+  <div class="container">
+    <div class="dsa-section-head">
+      <span class="dsa-eyebrow">Gallery</span>
+      <h2 class="dsa-h2">Campus life, in pictures.</h2>
+      <p class="dsa-section-sub">Reserved for school-approved photos of the campus, classrooms, and events.</p>
+    </div>
+
+    <div class="row g-3">
+      {% for img in gallery_images %}
+        <div class="col-6 col-md-4">
+          <a href="{{ url_for('static', filename=img) }}" target="_blank"
+             class="dsa-gallery-tile" style="display:block; text-decoration:none; color:inherit; cursor:zoom-in;">
+            <img src="{{ url_for('static', filename=img) }}" alt="Gallery {{ loop.index }}"
+                 onerror="this.style.display='none'; this.parentElement.classList.add('img-missing');">
+            <span class="dsa-gallery-label">{{ img }}</span>
+          </a>
+        </div>
+      {% endfor %}
+      {% for img in extra_gallery_images %}
+        <div class="col-6 col-md-4">
+          <a href="{{ url_for('static', filename=img) }}" target="_blank"
+             class="dsa-gallery-tile" style="display:block; text-decoration:none; color:inherit; cursor:zoom-in;">
+            <img src="{{ url_for('static', filename=img) }}" alt="Gallery {{ loop.index + 6 }}"
+                 onerror="this.style.display='none'; this.parentElement.classList.add('img-missing');">
+            <span class="dsa-gallery-label">{{ img }}</span>
+          </a>
+        </div>
+      {% endfor %}
+    </div>
+
+    <div class="text-center mt-4">
+      <a class="btn dsa-btn-ghost" href="{{ url_for('main.staff') }}">
+        Meet the staff →
+      </a>
+    </div>
+  </div>
+</section>
+
+{% endblock %}

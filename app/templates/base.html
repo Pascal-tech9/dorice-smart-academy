@@ -1,0 +1,187 @@
+{# -------------------------------------------------------------
+   base.html — Dorice Smart Academy
+   Built on top of Flask-Bootstrap. Provides the responsive
+   navbar (Home, Admissions, Results, Learning Resources) and
+   a footer with school contact + location.
+   ------------------------------------------------------------- #}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}{{ page_title or "Home" }} · {{ school_name }}{% endblock %}</title>
+
+  {# Brand favicon (matches the static site) #}
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='18' fill='%231B4332'/%3E%3Ctext x='50' y='66' font-family='Georgia,serif' font-size='52' font-weight='700' text-anchor='middle' fill='%23D4A017'%3EDS%3C/text%3E%3C/svg%3E">
+
+  {# Bootstrap 5 from CDN (Flask-Bootstrap's helpers are broken on modern Jinja) #}
+  {% block styles %}
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Work+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  {% endblock %}
+</head>
+<body>
+
+{# ---------------- NAVIGATION ---------------- #}
+<nav class="navbar navbar-expand-lg dsa-navbar sticky-top">
+  <div class="container">
+    <a class="navbar-brand d-flex align-items-center gap-2" href="{{ url_for('main.index') }}">
+      <span class="dsa-mark">DS</span>
+      <span class="dsa-brand-name">Dorice Smart Academy</span>
+    </a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#dsaNav"
+            aria-controls="dsaNav" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="dsaNav">
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+        <li class="nav-item">
+          <a class="nav-link {% if request.endpoint == 'main.index' %}active{% endif %}"
+             href="{{ url_for('main.index') }}">Home</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link {% if request.endpoint and request.endpoint.startswith('admissions') %}active{% endif %}"
+             href="{{ url_for('admissions.index') }}">Admissions</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link {% if request.endpoint and request.endpoint.startswith('results') %}active{% endif %}"
+             href="{{ url_for('results.index') }}">Results</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link {% if request.endpoint and request.endpoint.startswith('resources') %}active{% endif %}"
+             href="{{ url_for('resources.index') }}">Learning Resources</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link {% if request.endpoint == 'main.staff' %}active{% endif %}"
+             href="{{ url_for('main.staff') }}">Our Staff</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link {% if request.endpoint == 'main.admin_profile' %}active{% endif %}"
+             href="{{ url_for('main.admin_profile') }}">School Admin</a>
+        </li>
+      </ul>
+
+      <ul class="navbar-nav ms-auto align-items-lg-center">
+        {% if current_user.is_authenticated %}
+          <li class="nav-item dsa-user-chip">
+            <span class="dsa-chip-name">{{ current_user.full_name }}</span>
+            <span class="dsa-chip-meta">Adm {{ current_user.admission_number or '—' }} · {{ current_user.grade }}</span>
+            {% if not current_user.fees_cleared %}
+              <span class="badge bg-warning text-dark">Fees due</span>
+            {% else %}
+              <span class="badge bg-success">Cleared</span>
+            {% endif %}
+          </li>
+          <li class="nav-item"><a class="nav-link" href="{{ url_for('auth.records') }}">Records</a></li>
+          <li class="nav-item"><a class="nav-link" href="{{ url_for('auth.logout') }}">Sign out</a></li>
+        {% else %}
+          <li class="nav-item"><a class="nav-link" href="{{ url_for('auth.login') }}">Sign in</a></li>
+          <li class="nav-item">
+            <a class="btn dsa-cta-btn ms-lg-2" href="{{ url_for('auth.register') }}">Apply now</a>
+          </li>
+        {% endif %}
+      </ul>
+    </div>
+  </div>
+</nav>
+
+{# ---------------- FLASH MESSAGES ---------------- #}
+<div class="container mt-3">
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      {% for category, message in messages %}
+        <div class="alert alert-{{ category if category in ['success','warning','danger','info'] else 'info' }} alert-dismissible fade show" role="alert">
+          {{ message }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+</div>
+
+{# ---------------- MAIN CONTENT ---------------- #}
+<main>
+  {% block content %}{% endblock %}
+</main>
+
+{# ---------------- FOOTER ---------------- #}
+<footer class="dsa-footer mt-5">
+  <div class="container py-5">
+    <div class="row gy-4">
+      <div class="col-md-5">
+        <div class="d-flex align-items-center gap-2 mb-2">
+          <span class="dsa-mark">DS</span>
+          <strong class="dsa-footer-name">Dorice Smart Academy</strong>
+        </div>
+        <p class="dsa-footer-text mb-1">
+          <strong>Phone:</strong> <a href="tel:0115622615">{{ school_phone }}</a>
+        </p>
+        <p class="dsa-footer-text mb-1">
+          <strong>Location:</strong> {{ school_location }}
+        </p>
+        <p class="dsa-footer-text small">
+          "Safety First" — fenced compound, supervised drop-off and pick-up.
+        </p>
+      </div>
+      <div class="col-md-3">
+        <h6 class="dsa-footer-h">Explore</h6>
+        <ul class="list-unstyled dsa-footer-list">
+          <li><a href="{{ url_for('main.index') }}">Home</a></li>
+          <li><a href="{{ url_for('admissions.index') }}">Admissions</a></li>
+          <li><a href="{{ url_for('results.index') }}">Results</a></li>
+          <li><a href="{{ url_for('resources.index') }}">Learning Resources</a></li>
+        </ul>
+      </div>
+      <div class="col-md-4">
+        <h6 class="dsa-footer-h">Office hours</h6>
+        <p class="dsa-footer-text small mb-1">Mon – Fri, 7:00 am – 4:30 pm</p>
+        <p class="dsa-footer-text small mb-1">Gates open 07:00 – 16:30</p>
+        <p class="dsa-footer-text small">CBC curriculum, PP1 – Grade 9</p>
+      </div>
+    </div>
+    <hr class="dsa-footer-rule">
+    <div class="d-flex flex-wrap justify-content-between align-items-center small">
+      <span>© {{ now_year if now_year else '' }} Dorice Smart Academy · Built with care for the families of Lumakanda.</span>
+      <span class="dsa-footer-tag">"Safety First"</span>
+    </div>
+  </div>
+</footer>
+
+{% block scripts %}
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+{% endblock %}
+<!-- LIGHTBOX MODAL — shows any image full-size when clicked -->
+<div class="modal fade" id="imgLightbox" tabindex="-1">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content" style="background:#0E2A20; border:none;">
+      <div class="modal-header" style="border:none;">
+        <h5 class="modal-title text-white" id="imgLightboxLabel">Photo</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body text-center p-0">
+        <img id="imgLightboxImg" src="" alt="" style="max-width: 100%; max-height: 80vh; object-fit: contain;">
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// Lightbox for any clickable image
+document.addEventListener('click', function(e) {
+  const link = e.target.closest('a[href$=".jpg"], a[href$=".jpeg"], a[href$=".png"]');
+  if (link && link.target === '_blank') {
+    e.preventDefault();
+    document.getElementById('imgLightboxImg').src = link.href;
+    document.getElementById('imgLightboxLabel').textContent = link.querySelector('img')?.alt || 'Photo';
+    const modal = new bootstrap.Modal(document.getElementById('imgLightbox'));
+    modal.show();
+  }
+});
+</script>
+
+</body>
+</html>
