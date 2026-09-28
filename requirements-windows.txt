@@ -1,0 +1,19 @@
+# Windows-friendly subset for Supabase Postgres.
+# Includes psycopg2-binary (pre-built wheels available for Windows
+# when pip >= 21). Skips Flask-Bootstrap (broken on Flask 3 — we
+# load Bootstrap from CDN instead).
+Flask==3.0.3
+Flask-Login==0.6.3
+Flask-SQLAlchemy==3.1.1
+Flask-WTF==1.2.1
+Flask-Migrate==4.0.7
+Werkzeug==3.0.3
+email-validator==2.2.0
+gunicorn==22.0.0
+waitress==3.0.0
+requests==2.32.3
+Authlib==1.7.2
+openpyxl==3.1.5
+reportlab==5.0.0
+psycopg2-binary==2.9.9
+python-dotenv==1.0.1

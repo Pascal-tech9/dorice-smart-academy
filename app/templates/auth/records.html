@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="dsa-section">
+  <div class="container" style="max-width: 720px;">
+    <div class="dsa-card">
+      <h1 class="dsa-h2">Admission records</h1>
+      <p class="text-muted">Upload or replace the documents the school needs on file.</p>
+
+      <ul class="dsa-record-list">
+        <li>
+          <strong>Birth certificate:</strong>
+          {% if current_user.birth_certificate %}
+            <span class="badge bg-success">On file</span>
+            <code class="ms-2">{{ current_user.birth_certificate }}</code>
+          {% else %}
+            <span class="badge bg-warning text-dark">Missing</span>
+          {% endif %}
+        </li>
+        <li>
+          <strong>Immunization card:</strong>
+          {% if current_user.immunization_card %}
+            <span class="badge bg-success">On file</span>
+            <code class="ms-2">{{ current_user.immunization_card }}</code>
+          {% else %}
+            <span class="badge bg-warning text-dark">Missing</span>
+          {% endif %}
+        </li>
+      </ul>
+
+      <form method="post" enctype="multipart/form-data" class="mt-3">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="form-label">Replace birth certificate</label>
+            <input type="file" name="birth_certificate" class="form-control" accept=".pdf,.jpg,.jpeg,.png">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Replace immunization card</label>
+            <input type="file" name="immunization_card" class="form-control" accept=".pdf,.jpg,.jpeg,.png">
+          </div>
+        </div>
+        <button type="submit" class="btn dsa-btn-primary mt-3">Save</button>
+      </form>
+    </div>
+  </div>
+</section>
+{% endblock %}

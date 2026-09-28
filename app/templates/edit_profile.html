@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Student Record — {{ user.full_name }} · {{ school_name }}{% endblock %}
+
+{% block content %}
+
+<section class="dsa-section">
+  <div class="container">
+    <div class="dsa-section-head">
+      <span class="dsa-eyebrow">Administrator</span>
+      <h1 class="dsa-h1">Profile Editor</h1>
+      <p class="dsa-section-sub">Updating record for: <strong>{{ user.full_name }}</strong></p>
+    </div>
+
+    <div class="row justify-content-center">
+      <div class="col-lg-7">
+        <div class="dsa-card">
+          <form method="post" novalidate>
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label">Email</label>
+                <input type="email" name="email" class="form-control"
+                       value="{{ form.email.data or '' }}" required>
+                {% for e in form.email.errors %}
+                  <div class="dsa-field-error">{{ e }}</div>
+                {% endfor %}
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label">Username</label>
+                <input type="text" name="username" class="form-control"
+                       value="{{ form.username.data or '' }}" required>
+                {% for e in form.username.errors %}
+                  <div class="dsa-field-error">{{ e }}</div>
+                {% endfor %}
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label">Grade</label>
+                <input type="text" name="grade" class="form-control"
+                       value="{{ form.grade.data or '' }}">
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label">Role</label>
+                <select name="role" class="form-select">
+                  {% for choice_id, choice_name in form.role.choices %}
+                    <option value="{{ choice_id }}"
+                      {% if form.role.data == choice_id %}selected{% endif %}>
+                      {{ choice_name }}
+                    </option>
+                  {% endfor %}
+                </select>
+              </div>
+
+              <div class="col-12">
+                <div class="form-check dsa-checkbox-card">
+                  <input class="form-check-input" type="checkbox"
+                         name="fees_cleared" id="fees_cleared"
+                         {% if form.fees_cleared.data %}checked{% endif %}>
+                  <label class="form-check-label" for="fees_cleared">
+                    <strong>Fees Cleared</strong>
+                    <span class="dsa-small-note d-block">
+                      Unlocks the Results Portal for {{ user.full_name }} —
+                      the parent will see CBC assessment instead of the
+                      payment reminder.
+                    </span>
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <div class="d-flex gap-2 mt-4">
+              <button type="submit" name="submit" class="btn dsa-btn-primary">
+                Update Student Record
+              </button>
+              <a class="btn dsa-btn-ghost"
+                 href="{{ url_for('main.user_profile', username=user.username) }}">
+                Cancel
+              </a>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% endblock %}

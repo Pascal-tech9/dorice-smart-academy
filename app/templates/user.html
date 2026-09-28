@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<section class="dsa-section">
+  <div class="container">
+    <div class="row g-4">
+      <div class="col-lg-8">
+        <div class="dsa-card">
+          <span class="dsa-eyebrow">Learner Profile</span>
+          <h1 class="dsa-h1 mt-2">{{ user.full_name }}</h1>
+          <p class="dsa-section-sub mb-4">
+            <strong>Admission #:</strong> {{ user.admission_number or '—' }} ·
+            <strong>Grade:</strong> {{ user.grade }} ·
+            <strong>Email:</strong> {{ user.email }}
+          </p>
+
+          <div class="row g-3">
+            <div class="col-md-6">
+              <div class="dsa-info-block">
+                <div class="dsa-info-k">Role</div>
+                <div class="dsa-info-v">{{ user.role.name if user.role else 'Unassigned' }}</div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="dsa-info-block">
+                <div class="dsa-info-k">Fees status</div>
+                <div class="dsa-info-v">
+                  {% if user.fees_cleared %}
+                    <span class="badge bg-success">Cleared — results portal unlocked</span>
+                  {% else %}
+                    <span class="badge bg-warning text-dark">Pending — payment reminder shown</span>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="dsa-info-block">
+                <div class="dsa-info-k">Birth certificate</div>
+                <div class="dsa-info-v">
+                  {% if user.birth_certificate %}
+                    <span class="badge bg-success">On file</span>
+                  {% else %}
+                    <span class="badge bg-warning text-dark">Missing</span>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="dsa-info-block">
+                <div class="dsa-info-k">Immunization card</div>
+                <div class="dsa-info-v">
+                  {% if user.immunization_card %}
+                    <span class="badge bg-success">On file</span>
+                  {% else %}
+                    <span class="badge bg-warning text-dark">Missing</span>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-4">
+        <div class="dsa-card">
+          <h3 class="dsa-h3">Quick actions</h3>
+          {% if current_user.is_authenticated and current_user.is_administrator() %}
+            <p class="text-muted small mb-2">You are signed in as an administrator.</p>
+            <div class="admin-actions" style="margin-top: 12px;">
+              <a class="btn dsa-btn-primary w-100"
+                 href="{{ url_for('main.edit_profile_admin', id=user.id) }}">
+                Edit Profile [Admin Mode]
+              </a>
+            </div>
+          {% else %}
+            <p class="text-muted small mb-0">Only administrators can edit profile records.</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% endblock %}

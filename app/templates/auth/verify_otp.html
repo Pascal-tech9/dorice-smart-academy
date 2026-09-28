@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="dsa-section">
+  <div class="container" style="max-width:500px;">
+    <div class="dsa-card">
+      <div style="text-align:center; margin-bottom:24px;">
+        <div style="width:56px; height:56px; background:#1B4332; border-radius:50%;
+                    display:inline-flex; align-items:center; justify-content:center;
+                    font-size:24px; color:#D4A017;">✉</div>
+      </div>
+      <h1 class="dsa-h2" style="text-align:center;">Check your email</h1>
+      <p class="text-muted" style="text-align:center;">
+        A 6-digit code was sent to<br>
+        <strong>{{ user.email }}</strong>
+      </p>
+
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          <div style="margin:20px 0;">
+          {% for category, message in messages %}
+            <div class="alert-{{ category }}" style="padding:12px 16px;
+                        border-radius:6px; font-size:14px;
+                        {% if category == 'danger' %}background:#fde8e8; border:1px solid #f5c6c6; color:#9b2226;
+                        {% elif category == 'success' %}background:#e8f5e9; border:1px solid #c8e6c9; color:#2e7d32;
+                        {% else %}background:#fff8e1; border:1px solid #ffe082; color:#7d5a00;{% endif %}">
+              {{ message }}
+            </div>
+          {% endfor %}
+          </div>
+        {% endif %}
+      {% endwith %}
+
+      <form method="post" novalidate>
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+        <div style="text-align:center; margin:24px 0;">
+          <input type="text" name="code" placeholder="• • • • • •"
+                 maxlength="6" inputmode="numeric" pattern="[0-9]{6}"
+                 autocomplete="one-time-code" required autofocus
+                 style="width:180px; font-size:28px; letter-spacing:12px;
+                        text-align:center; padding:14px 16px;
+                        border:2px solid var(--line, #D8D3C2);
+                        border-radius:8px; font-family:monospace;
+                        background:#F6F4EC; color:#1B4332;
+                        outline:none;">
+        </div>
+
+        {% if remaining_attempts is not none and remaining_attempts <= 2 %}
+          <p style="text-align:center; font-size:13px; color:#A8532B; margin-bottom:16px;">
+            ⚠ {{ remaining_attempts }} attempt{{ "s" if remaining_attempts != 1 else "" }} remaining
+          </p>
+        {% endif %}
+
+        <button type="submit" class="btn dsa-btn-primary"
+                style="width:100%; margin-bottom:12px; font-size:16px;">
+          Verify Code
+        </button>
+
+        <div style="text-align:center; margin-top:16px; font-size:14px; color:#4B564F;">
+          Didn't receive it?
+          <button type="submit" name="action" value="resend"
+                  style="background:none; border:none; color:#A8532B;
+                         font-weight:600; cursor:pointer; text-decoration:underline;">
+            Resend code
+          </button>
+        </div>
+      </form>
+
+      <div style="text-align:center; margin-top:24px; font-size:13px; color:#4B564F;
+                  border-top:1px solid #D8D3C2; padding-top:20px;">
+        Wrong email address?
+        <a href="{{ url_for('auth.login') }}" style="color:#A8532B; font-weight:600;">
+          Register again
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+.dsa-btn-primary {
+  background: #1B4332; color: #fff; padding: 13px 24px;
+  border-radius: 6px; font-weight: 600; font-size: 14.5px;
+  border: none; cursor: pointer; display: inline-block;
+  transition: background .2s;
+}
+.dsa-btn-primary:hover { background: #2D6A4F; }
+.dsa-card {
+  background: #fff; border: 1px solid #D8D3C2;
+  border-radius: 12px; padding: 36px;
+}
+.dsa-h2 { font-family: serif; font-weight: 600; color: #1B4332; font-size: 24px; }
+</style>
+{% endblock %}

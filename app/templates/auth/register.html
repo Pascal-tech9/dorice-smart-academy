@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="dsa-section">
+  <div class="container" style="max-width: 720px;">
+    <div class="dsa-card">
+      <h1 class="dsa-h2">Create a parent account</h1>
+      <p class="text-muted">
+        New parents must identify the student they're a guardian of.
+        The school office will verify and approve your account before
+        you can sign in.
+      </p>
+
+      <form method="post" enctype="multipart/form-data" novalidate>
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+        <h3 class="dsa-h4 mt-3">Your details</h3>
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="form-label">Full name</label>
+            <input type="text" name="full_name" class="form-control" required>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Email (Gmail preferred)</label>
+            <input type="email" name="email" class="form-control" required>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Phone (for M-Pesa)</label>
+            <input type="tel" name="phone" class="form-control" placeholder="0712 345 678">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Password</label>
+            <input type="password" name="password" class="form-control" required minlength="8">
+          </div>
+        </div>
+
+        <h3 class="dsa-h4 mt-4">Identify your child</h3>
+        <p class="small text-muted">
+          We need the student's admission number and the name on our records.
+          If you don't know it, ask the school office.
+        </p>
+        <div class="row g-3">
+          <div class="col-md-5">
+            <label class="form-label">Student admission number</label>
+            <input type="text" name="admission_number" class="form-control"
+                   placeholder="DSA352" required pattern="DSA[0-9]{3,}"
+                   title="Format: DSA followed by 3 digits (e.g. DSA352)">
+          </div>
+          <div class="col-md-7">
+            <label class="form-label">Student's name (as on roster)</label>
+            <input type="text" name="student_name" class="form-control" required
+                   placeholder="e.g. PRECIOUS ZAINABU">
+          </div>
+          <div class="col-md-12">
+            <label class="form-label">Grade (your child is in)</label>
+            <select name="grade" class="form-select" required>
+              <option value="">— choose —</option>
+              <option>Playgroup</option>
+              <option>PP1</option><option>PP2</option>
+              <option>Grade 1</option><option>Grade 2</option><option>Grade 3</option>
+              <option>Grade 4</option><option>Grade 5</option><option>Grade 6</option>
+              <option>Grade 7</option><option>Grade 8</option><option>Grade 9</option>
+            </select>
+          </div>
+        </div>
+
+        <h3 class="dsa-h4 mt-4">Admission records (optional)</h3>
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="form-label">Birth certificate <span class="text-muted">(PDF/JPG/PNG, max 8MB)</span></label>
+            <input type="file" name="birth_certificate" class="form-control" accept=".pdf,.jpg,.jpeg,.png">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Immunization card <span class="text-muted">(PDF/JPG/PNG, max 8MB)</span></label>
+            <input type="file" name="immunization_card" class="form-control" accept=".pdf,.jpg,.jpeg,.png">
+          </div>
+        </div>
+
+        <button type="submit" class="btn dsa-btn-primary mt-4">Submit for verification</button>
+        <a class="btn dsa-btn-ghost mt-4" href="{{ url_for('auth.login') }}">I already have an account</a>
+      </form>
+    </div>
+  </div>
+</section>
+{% endblock %}
+

@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block title %}Send payment request — {{ school_name }}{% endblock %}
+
+{% block content %}
+
+<section class="dsa-section">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-lg-7">
+        <div class="dsa-card dsa-pay-card">
+          <div class="dsa-pay-eyebrow">Admin tool</div>
+          <h1 class="dsa-h1 mt-2">Send M-Pesa request to parent</h1>
+          <p class="dsa-lead mt-2">
+            Use this when a parent calls the office and says
+            <em>"send me an M-Pesa prompt so I can pay"</em>. We fire
+            a Lipa Na M-Pesa Online prompt to their phone — they enter
+            their PIN, the money moves, and the results portal unlocks.
+          </p>
+
+          {% if not config.MPESA_CONSUMER_KEY %}
+          <div class="alert alert-info">
+            <strong>Simulator mode:</strong> M-Pesa Daraja credentials aren't
+            configured on this server, so requests are simulated locally.
+          </div>
+          {% endif %}
+
+          <form method="post" novalidate class="mt-3">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+            <div class="row g-3">
+              <div class="col-md-12">
+                <label class="form-label">Parent email</label>
+                <input type="email" name="parent_email" class="form-control"
+                       value="{{ form.parent_email.data or '' }}" required>
+                {% for e in form.parent_email.errors %}<div class="dsa-field-error">{{ e }}</div>{% endfor %}
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Amount (KES)</label>
+                <div class="input-group">
+                  <span class="input-group-text">KES</span>
+                  <input type="number" name="amount" class="form-control"
+                         value="{{ form.amount.data or '' }}" min="1" max="500000" required>
+                </div>
+                {% for e in form.amount.errors %}<div class="dsa-field-error">{{ e }}</div>{% endfor %}
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Parent M-Pesa phone</label>
+                <input type="tel" name="phone" class="form-control"
+                       value="{{ form.phone.data or '' }}" placeholder="0712 345 678" required>
+                {% for e in form.phone.errors %}<div class="dsa-field-error">{{ e }}</div>{% endfor %}
+              </div>
+              <div class="col-md-12">
+                <label class="form-label">What this is for</label>
+                <input type="text" name="purpose" class="form-control"
+                       value="{{ form.purpose.data or 'Term fees' }}" required>
+                {% for e in form.purpose.errors %}<div class="dsa-field-error">{{ e }}</div>{% endfor %}
+              </div>
+            </div>
+
+            <div class="d-flex gap-2 mt-4">
+              <button type="submit" class="btn dsa-btn-primary">Send M-Pesa request</button>
+              <a class="btn dsa-btn-ghost" href="{{ url_for('main.index') }}">Cancel</a>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% endblock %}

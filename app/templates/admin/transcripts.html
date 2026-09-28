@@ -1,0 +1,186 @@
+{% extends "base.html" %}
+
+{% block title %}Transcripts — Admin{% endblock %}
+
+{% block content %}
+<section class="dsa-section">
+  <div class="container">
+    <a href="{{ url_for('admin.dashboard') }}" class="btn dsa-btn-ghost mb-3">← Admin</a>
+    <div class="d-flex justify-content-between align-items-center">
+      <h1 class="dsa-h1">All transcripts</h1>
+      <a class="btn dsa-btn-primary" href="{{ url_for('admin.transcript_new') }}">📝 New transcript</a>
+    </div>
+
+    <div class="table-responsive mt-3">
+      <table class="table table-striped table-sm">
+        <thead>
+          <tr>
+            <th>Student</th>
+            <th>Term</th>
+            <th>Year</th>
+            <th>Grade</th>
+            <th>Phase</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for t in transcripts %}
+            <tr>
+              <td><code>{{ t.student.admission_number }}</code> — {{ t.student.full_name }}</td>
+              <td>{{ t.term }}</td>
+              <td>{{ t.year }}</td>
+              <td>{{ t.grade }}</td>
+              <td>{{ t.phase }}</td>
+              <td>
+                {% if t.is_published %}
+                  <span class="badge bg-success">Published</span>
+                {% else %}
+                  <span class="badge bg-secondary">Draft</span>
+                {% endif %}
+              </td>
+              <td>
+                <button type="button" class="btn btn-sm btn-outline-primary"
+                        onclick="openSubjectEditor({{ t.id }}, '{{ t.student.full_name|e }}', '{{ t.term|e }}', {{ t.year }})">
+                  📝 Edit subjects
+                </button>
+                <a class="btn btn-sm btn-outline-secondary"
+                   href="{{ url_for('student.view_transcript', transcript_id=t.id) }}">View</a>
+                {% if not t.is_published %}
+                <form method="post" class="d-inline"
+                      action="{{ url_for('admin.transcript_publish', tid=t.id) }}">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                  <button class="btn btn-sm btn-success" type="submit">Publish</button>
+                </form>
+                {% endif %}
+              </td>
+            </tr>
+          {% else %}
+            <tr><td colspan="7" class="text-center text-muted py-4">No transcripts yet.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Per-subject editor (AJAX-driven). Click "📝 Edit subjects" on any row
+         to open this panel; each cell is auto-saved on blur or Enter. -->
+    <div id="subject-editor" class="card mt-3 d-none">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <h3 class="h5 mb-0">
+          <span id="subject-editor-title">Per-subject editor</span>
+        </h3>
+        <button type="button" class="btn-close" onclick="closeSubjectEditor()"></button>
+      </div>
+      <div class="card-body">
+        <p class="small text-muted mb-2">
+          Type a new score 1–4 in any cell and press <kbd>Tab</kbd> or <kbd>Enter</kbd>
+          to save just that subject. The parent sees the change within seconds.
+        </p>
+        <div class="table-responsive">
+          <table class="table table-sm align-middle">
+            <thead>
+              <tr>
+                <th>Subject</th>
+                <th class="text-center">Entry 1</th>
+                <th class="text-center">Mid-Term</th>
+                <th class="text-center">End-Term</th>
+                <th>Comment</th>
+              </tr>
+            </thead>
+            <tbody id="subject-editor-rows"></tbody>
+          </table>
+        </div>
+        <p id="subject-editor-status" class="small mb-0 text-muted"></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+const SUBJECT_EDITOR = {
+  transcriptId: null,
+  rows: [],
+};
+
+async function openSubjectEditor(transcriptId, studentName, term, year) {
+  SUBJECT_EDITOR.transcriptId = transcriptId;
+  document.getElementById('subject-editor-title').textContent =
+    `Per-subject editor — ${studentName} · ${term} ${year}`;
+  document.getElementById('subject-editor').classList.remove('d-none');
+  document.getElementById('subject-editor-status').textContent = 'Loading…';
+  document.getElementById('subject-editor-rows').innerHTML = '';
+  document.getElementById('subject-editor').scrollIntoView({behavior:'smooth'});
+  try {
+    const r = await fetch(`/admin/transcripts/${transcriptId}/lines.json`);
+    if (!r.ok) throw new Error('Failed to load');
+    const data = await r.json();
+    renderSubjectRows(data.lines || []);
+  } catch (e) {
+    document.getElementById('subject-editor-status').innerHTML =
+      '<span class="text-danger">Failed to load subjects: ' + e.message + '</span>';
+  }
+}
+
+function renderSubjectRows(lines) {
+  SUBJECT_EDITOR.rows = lines;
+  const tbody = document.getElementById('subject-editor-rows');
+  if (!lines.length) {
+    tbody.innerHTML = '<tr><td colspan="5" class="text-muted text-center py-3">No subjects on this transcript yet.</td></tr>';
+    document.getElementById('subject-editor-status').textContent = '0 subjects.';
+    return;
+  }
+  tbody.innerHTML = lines.map(line => `
+    <tr data-line-id="${line.id}">
+      <td><strong>${escapeHtml(line.subject)}</strong></td>
+      <td><input type="number" min="1" max="4" class="form-control form-control-sm text-center"
+                 value="${line.entry_score || ''}" data-field="entry_score"></td>
+      <td><input type="number" min="1" max="4" class="form-control form-control-sm text-center"
+                 value="${line.mid_score || ''}" data-field="mid_score"></td>
+      <td><input type="number" min="1" max="4" class="form-control form-control-sm text-center"
+                 value="${line.end_score || ''}" data-field="end_score"></td>
+      <td><input type="text" class="form-control form-control-sm"
+                 value="${escapeHtml(line.facilitator_comment || '')}"
+                 data-field="facilitator_comment" placeholder="Optional"></td>
+    </tr>`).join('');
+  document.getElementById('subject-editor-status').textContent =
+    `${lines.length} subjects. Edit any cell and press Tab/Enter to save.`;
+
+  // Wire per-cell save
+  tbody.querySelectorAll('input').forEach(input => {
+    const save = async () => {
+      const tr = input.closest('tr');
+      const lineId = tr.dataset.lineId;
+      const field = input.dataset.field;
+      const value = input.value;
+      const status = document.getElementById('subject-editor-status');
+      status.innerHTML = '<span class="text-muted">Saving…</span>';
+      try {
+        const r = await fetch(`/admin/transcripts/${SUBJECT_EDITOR.transcriptId}/lines/${lineId}`, {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({field, value}),
+        });
+        const data = await r.json();
+        if (!data.ok) throw new Error(data.error || 'Save failed');
+        status.innerHTML = `<span class="text-success">✓ Saved ${escapeHtml(input.closest('tr').querySelector('strong').textContent)} · ${field.toUpperCase()} = ${escapeHtml(String(data.value))}</span>`;
+      } catch (e) {
+        status.innerHTML = '<span class="text-danger">' + escapeHtml(e.message) + '</span>';
+      }
+    };
+    input.addEventListener('blur', save);
+    input.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); save(); }});
+  });
+}
+
+function closeSubjectEditor() {
+  document.getElementById('subject-editor').classList.add('d-none');
+  SUBJECT_EDITOR.transcriptId = null;
+}
+
+function escapeHtml(s) {
+  return (s == null ? '' : String(s))
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+}
+</script>
+{% endblock %}
