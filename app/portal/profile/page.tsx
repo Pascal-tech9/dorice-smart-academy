@@ -268,15 +268,12 @@ export default function GuardianProfilePage() {
                       {student.firstName} {student.lastName}
                     </div>
                     <div className="text-fluid-xs text-text-muted">
-                      {student.grade} • Adm: {student.admissionNumber}
+                      {student.gradeLevel} • Adm: {student.admissionNumber}
                     </div>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Badge
-                    variant={student.feeBalance === 0 ? 'paid' : 'partial'}
-                    label={student.feeBalance === 0 ? 'Fees Cleared' : 'Balance Due'}
-                  />
+                  <Badge variant={student.feeBalance === 0 ? 'paid' : 'partial'} label={student.feeBalance === 0 ? 'Fees Cleared' : 'Balance Due'} />
                   <ChevronRight className="w-4 h-4 text-text-muted" />
                 </div>
               </div>

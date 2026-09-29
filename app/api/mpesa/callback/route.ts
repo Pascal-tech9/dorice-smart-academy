@@ -14,7 +14,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { C2bConfirmationSchema, parseAccountNumber } from '@/lib/mpesa/daraja';
-import { createServiceClient } from '@/lib/supabase/service-role';
+import { createServiceRoleClient } from '@/lib/supabase/service-role';
 
 const DARAJA_OK = { ResultCode: 0, ResultDesc: 'Success' };
 const SECRET = process.env.MPESA_CALLBACK_SECRET_PATH ?? 'dev_callback_secret';
@@ -50,7 +50,8 @@ export async function POST(req: NextRequest) {
   const transTime = cb.TransTime; // YYYYMMDDHHmmss
 
   // ── Step 1: Persist raw payload (idempotent) ───────────────────────────────
-  const supabase = createServiceClient();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const supabase = createServiceRoleClient() as any;
 
   const { error: insertError } = await supabase.from('mpesa_transactions').insert({
     receipt_number: receiptNumber,
@@ -142,7 +143,8 @@ export async function GET(_req: NextRequest) {
  * Creates a payment record, allocates to invoices, generates a receipt.
  */
 async function autoAllocate(opts: {
-  supabase: ReturnType<typeof createServiceClient>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  supabase: any;
   receiptNumber: string;
   studentId: string;
   amountCents: number;

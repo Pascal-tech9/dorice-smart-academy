@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { sendEmail } from '@/lib/email/resend';
 import { renderResultsPublishedEmail } from '@/lib/email/templates/results-published';
-import { createServiceClient } from '@/lib/supabase/service-role';
+import { createServiceRoleClient } from '@/lib/supabase/service-role';
 
 /**
  * POST /api/notifications/results-published
@@ -39,7 +39,8 @@ export async function POST(req: NextRequest) {
   }
 
   const { studentId, termLabel, grade } = parsed.data;
-  const supabase = createServiceClient();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const supabase = createServiceRoleClient() as any;
 
   // Fetch student name
   const { data: student } = await supabase

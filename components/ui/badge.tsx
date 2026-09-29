@@ -1,7 +1,17 @@
 import * as React from 'react';
-import { CheckCircle2, Clock, AlertTriangle, AlertCircle, Info } from 'lucide-react';
+import { CheckCircle2, Clock, AlertTriangle, AlertCircle, Info, XCircle } from 'lucide-react';
 
-export type StatusVariant = 'paid' | 'partial' | 'unpaid' | 'overdue' | 'credit';
+export type StatusVariant =
+  | 'paid'
+  | 'partial'
+  | 'unpaid'
+  | 'overdue'
+  | 'credit'
+  | 'arrears'   // alias for overdue (CBC/fee contexts)
+  | 'success'   // alias for paid (general success states)
+  | 'info'      // teal info badge
+  | 'draft'     // neutral grey draft state
+  | 'warning';  // gold warning state
 
 interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
   variant: StatusVariant;
@@ -10,9 +20,14 @@ interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
 }
 
 export function Badge({ variant, label, showIcon = true, className = '', children, ...props }: BadgeProps) {
-  const configs = {
+  const configs: Record<StatusVariant, { text: string; styles: string; icon: React.ElementType }> = {
     paid: {
       text: label || 'Paid',
+      styles: 'bg-success-soft text-success-fg border-success-border',
+      icon: CheckCircle2,
+    },
+    success: {
+      text: label || 'Success',
       styles: 'bg-success-soft text-success-fg border-success-border',
       icon: CheckCircle2,
     },
@@ -21,18 +36,38 @@ export function Badge({ variant, label, showIcon = true, className = '', childre
       styles: 'bg-warning-soft text-warning-fg border-warning-border',
       icon: Clock,
     },
+    warning: {
+      text: label || 'Warning',
+      styles: 'bg-warning-soft text-warning-fg border-warning-border',
+      icon: Clock,
+    },
     unpaid: {
       text: label || 'Unpaid',
       styles: 'bg-surface text-primary border-primary',
       icon: AlertCircle,
+    },
+    draft: {
+      text: label || 'Draft',
+      styles: 'bg-surface text-text-muted border-border',
+      icon: Clock,
     },
     overdue: {
       text: label || 'Overdue',
       styles: 'bg-danger-soft text-danger-fg border-danger-border',
       icon: AlertTriangle,
     },
+    arrears: {
+      text: label || 'Arrears',
+      styles: 'bg-danger-soft text-danger-fg border-danger-border',
+      icon: AlertTriangle,
+    },
     credit: {
       text: label || 'Credit',
+      styles: 'bg-info-soft text-info-fg border-info-border',
+      icon: Info,
+    },
+    info: {
+      text: label || 'Info',
       styles: 'bg-info-soft text-info-fg border-info-border',
       icon: Info,
     },

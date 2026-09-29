@@ -44,7 +44,7 @@ export function MpesaPaymentModal({
   // TODO: Confirm the exact account number format with the school.
   // Current assumption: 369369#StudentName,Grade
   // Alternatives: just the admission number, or a different prefix.
-  const accountNumber = `369369#${student.firstName}${student.lastName},${student.grade ?? student.className}`;
+  const accountNumber = `369369#${student.firstName}${student.lastName},${student.gradeLevel ?? student.className}`;
   const paybillNumber = '400222';
 
   React.useEffect(() => {

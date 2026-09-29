@@ -32,7 +32,7 @@ export async function sendEmail(opts: SendEmailOptions): Promise<{ id: string }>
     to: Array.isArray(opts.to) ? opts.to : [opts.to],
     subject: opts.subject,
     html: opts.html,
-    reply_to: opts.replyTo ?? 'admin@doricesmartacademy.sc.ke',
+    replyTo: opts.replyTo ?? 'admin@doricesmartacademy.sc.ke',
   });
 
   if (error) {

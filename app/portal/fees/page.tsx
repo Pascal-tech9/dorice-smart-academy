@@ -175,14 +175,14 @@ export default function GuardianFeesPage() {
                       6,000.00
                     </td>
                     <td className="py-3 px-4 text-center">
-                      <button
-                        type="button"
-                        onClick={() => alert('Receipt RCT-2026-0039 downloaded.')}
-                        className="text-primary hover:underline font-bold text-fluid-xs inline-flex items-center gap-1 cursor-pointer"
+                      <a
+                        href={`/api/reports/pdf/${activeStudent.admissionNumber}?type=receipt&ref=RCT-2026-0039`}
+                        download
+                        className="text-primary hover:underline font-bold text-fluid-xs inline-flex items-center gap-1"
                       >
                         <Download className="w-3.5 h-3.5" />
                         <span>Download PDF</span>
-                      </button>
+                      </a>
                     </td>
                   </tr>
                 </tbody>
@@ -199,7 +199,8 @@ export default function GuardianFeesPage() {
                 Settle Outstanding Balance: KES {activeStudent.feeBalance.toLocaleString()}
               </h3>
               <p className="text-fluid-xs opacity-90 mt-0.5">
-                Pay with M-PESA Daraja prompt or use school Paybill with account <strong>{activeStudent.admissionNumber}</strong>.
+                Pay via <strong>M-PESA Paybill 400222</strong> — open M-PESA on your phone,
+                go to Lipa Na M-PESA → Paybill → enter business number <strong>400222</strong>.
               </p>
             </div>
             <div>
@@ -218,17 +219,10 @@ export default function GuardianFeesPage() {
 
       </div>
 
-      {/* M-PESA Payment Modal */}
       <MpesaPaymentModal
         isOpen={isPaymentModalOpen}
         onClose={() => setIsPaymentModalOpen(false)}
         student={activeStudent}
-        onPaymentSuccess={(_receipt, amountPaid) => {
-          setActiveStudent((prev) => ({
-            ...prev,
-            feeBalance: Math.max(0, prev.feeBalance - amountPaid),
-          }));
-        }}
       />
     </div>
   );

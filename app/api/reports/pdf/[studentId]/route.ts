@@ -20,9 +20,11 @@ export async function GET(
       return NextResponse.json({ error: 'Report card not found' }, { status: 404 });
     }
 
-    const pdfBuffer = await renderToBuffer(
-      React.createElement(CbcReportCardPdf, { data: reportData })
-    );
+    // react-pdf's renderToBuffer expects a ReactElement<DocumentProps>.
+    // We cast here since CbcReportCardPdf returns a <Document> which satisfies
+    // that constraint at runtime — TypeScript just can't verify it automatically.
+    const element = React.createElement(CbcReportCardPdf, { data: reportData }) as any;
+    const pdfBuffer = await renderToBuffer(element);
 
     return new NextResponse(pdfBuffer as any, {
       headers: {

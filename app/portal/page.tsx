@@ -138,8 +138,9 @@ export default function GuardianPortalPage() {
                 {activeStudent.feeBalance > 0 ? (
                   <div className="p-4 rounded-[12px] bg-bg border border-border space-y-3">
                     <div className="text-fluid-xs text-text leading-relaxed">
-                      Settle your child&apos;s balance instantly via <strong>Lipa Na M-PESA Online (STK Push)</strong>.
-                      A receipt SMS and updated statement will be generated automatically.
+                      Pay via <strong>M-PESA Paybill 400222</strong> — open M-PESA on your phone,
+                      go to <em>Lipa Na M-PESA → Paybill → 400222</em>. Your updated fee statement
+                      reflects automatically within minutes.
                     </div>
                     <Button
                       variant="accent"
@@ -148,7 +149,7 @@ export default function GuardianPortalPage() {
                       onClick={() => setIsPaymentModalOpen(true)}
                     >
                       <CreditCard className="w-5 h-5" />
-                      <span>Pay {formattedBalance} with M-PESA</span>
+                      <span>Pay via M-PESA Paybill — View Guide</span>
                     </Button>
                   </div>
                 ) : (
@@ -252,17 +253,11 @@ export default function GuardianPortalPage() {
         Dorice Smart Academy School Portal • Kipkaren River, Kenya • Motto: &quot;Inspire, Achieve, Flourish&quot;
       </footer>
 
-      {/* M-PESA Payment Modal */}
+      {/* M-PESA Payment Modal — Paybill C2B 400222 */}
       <MpesaPaymentModal
         isOpen={isPaymentModalOpen}
         onClose={() => setIsPaymentModalOpen(false)}
         student={activeStudent}
-        onPaymentSuccess={(_receipt, amountPaid) => {
-          setActiveStudent((prev) => ({
-            ...prev,
-            feeBalance: Math.max(0, prev.feeBalance - amountPaid),
-          }));
-        }}
       />
 
       {/* PWA Install Banner — Android/Chrome only */}

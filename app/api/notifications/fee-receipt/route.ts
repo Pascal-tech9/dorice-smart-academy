@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { sendEmail } from '@/lib/email/resend';
 import { renderFeeReceiptEmail } from '@/lib/email/templates/fee-receipt';
 import { sendSms, buildReceiptSms } from '@/lib/sms/africastalking';
-import { createServiceClient } from '@/lib/supabase/service-role';
+import { createServiceRoleClient } from '@/lib/supabase/service-role';
 
 /**
  * POST /api/notifications/fee-receipt
@@ -51,7 +51,8 @@ export async function POST(req: NextRequest) {
   }
 
   const data = parsed.data;
-  const supabase = createServiceClient();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const supabase = createServiceRoleClient() as any;
 
   // Fetch guardian and student details
   const [{ data: guardian }, { data: student }] = await Promise.all([

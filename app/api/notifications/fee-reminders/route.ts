@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { sendEmail } from '@/lib/email/resend';
 import { renderFeeReminderEmail } from '@/lib/email/templates/fee-reminder';
 import { sendSms, buildReminderSms } from '@/lib/sms/africastalking';
-import { createServiceClient } from '@/lib/supabase/service-role';
+import { createServiceRoleClient } from '@/lib/supabase/service-role';
 
 /**
  * POST /api/notifications/fee-reminders
@@ -27,7 +27,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 
-  const supabase = createServiceClient();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const supabase = createServiceRoleClient() as any;
 
   /**
    * Query students with outstanding balances in the current term.
