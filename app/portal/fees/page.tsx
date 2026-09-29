@@ -3,6 +3,7 @@
 import * as React from 'react';
 import Link from 'next/link';
 import { ArrowLeft, CreditCard, Download, FileText, CheckCircle2, Clock, AlertTriangle, ShieldCheck } from 'lucide-react';
+import { createClient } from '@/lib/supabase/client';
 import { DEMO_STUDENTS, type StudentRecord } from '@/lib/people/mock-data';
 import { FamilySwitcher } from '@/components/portal/family-switcher';
 import { MpesaPaymentModal } from '@/components/portal/mpesa-payment-modal';
@@ -11,9 +12,114 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/com
 import { Badge } from '@/components/ui/badge';
 
 export default function GuardianFeesPage() {
-  const familyStudents = DEMO_STUDENTS.slice(0, 2);
-  const [activeStudent, setActiveStudent] = React.useState<StudentRecord>(familyStudents[0]);
+  const supabase = React.useMemo(() => createClient(), []);
+  const [students, setStudents] = React.useState<StudentRecord[]>(DEMO_STUDENTS.slice(0, 2));
+  const [activeStudent, setActiveStudent] = React.useState<StudentRecord>(() => {
+    if (typeof window !== 'undefined') {
+      const param = new URLSearchParams(window.location.search).get('student') || localStorage.getItem('dsa_active_student_adm');
+      if (param) {
+        const found = DEMO_STUDENTS.find(
+          (s) =>
+            s.admissionNumber === param ||
+            s.admissionNumber.replace(/\//g, '-') === param ||
+            s.admissionNumber.replace(/-/g, '/') === param ||
+            s.firstName.toLowerCase() === param.toLowerCase()
+        );
+        if (found) return found;
+      }
+    }
+    return DEMO_STUDENTS[0];
+  });
   const [isPaymentModalOpen, setIsPaymentModalOpen] = React.useState<boolean>(false);
+
+  // Load live guardian students and invoices from Supabase
+  React.useEffect(() => {
+    async function loadGuardianData() {
+      try {
+        const { data, error } = await supabase
+          .from('students')
+          .select(`
+            id,
+            admission_number,
+            first_name,
+            last_name,
+            gender,
+            date_of_birth,
+            nemis_upi,
+            status,
+            classes:class_id ( name ),
+            invoices ( total_amount, balance_due, status )
+          `)
+          .in('admission_number', ['DSA/2026/001', 'DSA/2026/002', 'DSA-2026-0001', 'DSA-2026-0002']);
+
+        if (data && data.length > 0) {
+          const mapped: StudentRecord[] = data.map((s: any) => {
+            const inv = s.invoices?.[0];
+            const feeBal = inv ? Number(inv.balance_due) : (s.admission_number?.includes('001') ? 0 : 15500);
+            const feeTot = inv ? Number(inv.total_amount) : 18500;
+            return {
+              id: s.id,
+              admissionNumber: s.admission_number,
+              firstName: s.first_name,
+              lastName: s.last_name,
+              gender: s.gender,
+              dateOfBirth: s.date_of_birth,
+              nemisUpi: s.nemis_upi || 'NEMIS-PENDING',
+              gradeLevel: s.classes?.name ? s.classes.name.replace(' Main', '') : (s.admission_number?.includes('001') ? 'Grade 4' : 'Grade 2'),
+              className: s.classes?.name || (s.admission_number?.includes('001') ? 'Grade 4 Main' : 'Grade 2 Main'),
+              status: s.status || 'active',
+              feeBalance: feeBal,
+              termFee: feeTot,
+              guardians: [
+                {
+                  name: 'Mary Wanjiku',
+                  relationship: 'Mother',
+                  phone: '+254712345678',
+                  isPrimary: true,
+                  canPay: true,
+                },
+              ],
+              recentResults: {
+                term: 'Term 1',
+                year: '2026',
+                overallLevel: s.admission_number?.includes('001') ? 'EE' : 'ME',
+                attendanceDays: s.admission_number?.includes('001') ? 63 : 61,
+                totalDays: 65,
+                remarks: s.admission_number?.includes('001') ? 'Outstanding academic and co-curricular performance.' : 'Good steady progress in all learning areas.',
+              },
+            };
+          });
+
+          setStudents(mapped);
+
+          // Preserve active student selection
+          const targetAdm =
+            (typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('student') : null) ||
+            (typeof window !== 'undefined' ? localStorage.getItem('dsa_active_student_adm') : null) ||
+            activeStudent.admissionNumber;
+
+          const matched = mapped.find(
+            (m) =>
+              m.admissionNumber === targetAdm ||
+              m.admissionNumber.replace(/\//g, '-') === targetAdm ||
+              m.admissionNumber.replace(/-/g, '/') === targetAdm ||
+              m.firstName.toLowerCase() === targetAdm?.toLowerCase() ||
+              m.id === activeStudent.id
+          );
+
+          if (matched) {
+            setActiveStudent(matched);
+          } else if (mapped.length > 0) {
+            setActiveStudent(mapped[0]);
+          }
+        }
+      } catch (err) {
+        console.warn('Using initial portal demo records:', err);
+      }
+    }
+
+    loadGuardianData();
+  }, [supabase]);
 
   const invoiceItems = [
     { desc: 'Tuition & Academic CBC Materials', amount: 12000 },
@@ -51,7 +157,7 @@ export default function GuardianFeesPage() {
 
           <div className="flex items-center gap-3">
             <FamilySwitcher
-              students={familyStudents}
+              students={students}
               activeStudent={activeStudent}
               onSelectStudent={setActiveStudent}
             />

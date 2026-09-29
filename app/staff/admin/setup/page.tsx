@@ -2,18 +2,42 @@
 
 import * as React from 'react';
 import Link from 'next/link';
-import { ArrowLeft, CheckCircle2, Calendar, BookOpen, Layers, Award, Save, RefreshCw, Shield, Sparkles } from 'lucide-react';
+import { createClient } from '@/lib/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { ArrowLeft, CheckCircle2, Calendar, BookOpen, Layers, Award, Save, RefreshCw, Shield, Sparkles, Lock } from 'lucide-react';
 
 export default function AdminSetupWizardPage() {
+  const supabase = React.useMemo(() => createClient(), []);
   const [currentStep, setCurrentStep] = React.useState<number>(1);
   const [yearName, setYearName] = React.useState('2026');
   const [startDate, setStartDate] = React.useState('2026-01-05');
   const [endDate, setEndDate] = React.useState('2026-11-27');
   const [seeded, setSeeded] = React.useState(false);
+  const [gateResultsOnFees, setGateResultsOnFees] = React.useState<boolean>(true);
   const [savedMessage, setSavedMessage] = React.useState<string | null>(null);
+
+  // Load live gate setting from Supabase
+  React.useEffect(() => {
+    async function loadGateSetting() {
+      try {
+        const { data } = await supabase
+          .from('settings')
+          .select('value')
+          .eq('key', 'gate_results_on_fees')
+          .maybeSingle();
+
+        if (data?.value) {
+          const enabled = (data.value as any).enabled ?? (data.value as any).gate_results_on_fees ?? true;
+          setGateResultsOnFees(enabled);
+        }
+      } catch (err) {
+        console.warn('Could not fetch gate setting:', err);
+      }
+    }
+    loadGateSetting();
+  }, [supabase]);
 
   const steps = [
     { id: 1, title: 'Academic Year & Terms', icon: Calendar },
@@ -21,6 +45,7 @@ export default function AdminSetupWizardPage() {
     { id: 3, title: 'Classes & Streams', icon: BookOpen },
     { id: 4, title: 'Learning Areas', icon: Award },
     { id: 5, title: 'Grading Rubric', icon: Shield },
+    { id: 6, title: 'Results Visibility Gate', icon: Lock },
   ];
 
   const gradeLevels = [
@@ -92,7 +117,7 @@ export default function AdminSetupWizardPage() {
         )}
 
         {/* Step Navigation Tabs */}
-        <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 p-1.5 bg-surface rounded-[12px] border border-border shadow-sm">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 p-1.5 bg-surface rounded-[12px] border border-border shadow-sm">
           {steps.map((step) => {
             const Icon = step.icon;
             const isActive = currentStep === step.id;
@@ -402,9 +427,89 @@ export default function AdminSetupWizardPage() {
                 <Button variant="outline" onClick={() => setCurrentStep(4)}>
                   Back
                 </Button>
-                <Link href="/login">
+                <Button variant="accent" onClick={() => handleStepSave(6)}>
+                  Save & Continue to Results Visibility Gate
+                </Button>
+              </div>
+            </CardFooter>
+          </Card>
+        )}
+
+        {/* Step 6: Results Visibility Gate */}
+        {currentStep === 6 && (
+          <Card>
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <Lock className="w-5 h-5 text-primary" />
+                <CardTitle>6. Results Visibility Gate (Fee Clearance Policy)</CardTitle>
+              </div>
+              <CardDescription>
+                Enforce automatic report card gating based on term invoice settlement.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="space-y-4">
+                <label className="flex items-start gap-3 p-4 rounded-[12px] bg-bg border border-border cursor-pointer hover:bg-surface-muted transition-colors">
+                  <input
+                    type="radio"
+                    name="gateOption"
+                    checked={gateResultsOnFees === true}
+                    onChange={async () => {
+                      setGateResultsOnFees(true);
+                      await supabase.from('settings').upsert({
+                        key: 'gate_results_on_fees',
+                        value: { enabled: true },
+                      }, { onConflict: 'key' });
+                      setSavedMessage('Results Visibility Gate enabled (Fee clearance required).');
+                      setTimeout(() => setSavedMessage(null), 4000);
+                    }}
+                    className="mt-1 w-4 h-4 text-primary focus:ring-primary"
+                  />
+                  <div className="space-y-1">
+                    <div className="font-bold text-fluid-sm text-primary">
+                      Require fees to be fully cleared before guardians can view report cards (Gate ON - Default)
+                    </div>
+                    <p className="text-fluid-xs text-text-muted leading-relaxed">
+                      Term assessment report cards remain locked to parents and guardians until their student&apos;s invoice balance for that term is fully paid (balance = 0). Once paid, results become visible immediately.
+                    </p>
+                  </div>
+                </label>
+
+                <label className="flex items-start gap-3 p-4 rounded-[12px] bg-bg border border-border cursor-pointer hover:bg-surface-muted transition-colors">
+                  <input
+                    type="radio"
+                    name="gateOption"
+                    checked={gateResultsOnFees === false}
+                    onChange={async () => {
+                      setGateResultsOnFees(false);
+                      await supabase.from('settings').upsert({
+                        key: 'gate_results_on_fees',
+                        value: { enabled: false },
+                      }, { onConflict: 'key' });
+                      setSavedMessage('Results Visibility Gate disabled (All published results visible).');
+                      setTimeout(() => setSavedMessage(null), 4000);
+                    }}
+                    className="mt-1 w-4 h-4 text-primary focus:ring-primary"
+                  />
+                  <div className="space-y-1">
+                    <div className="font-bold text-fluid-sm text-text">
+                      Allow guardians to view results even with outstanding fees (Gate OFF)
+                    </div>
+                    <p className="text-fluid-xs text-text-muted leading-relaxed">
+                      When OFF, all parents and guardians can view published report cards immediately upon release, regardless of fee balance.
+                    </p>
+                  </div>
+                </label>
+              </div>
+            </CardContent>
+            <CardFooter>
+              <div className="flex items-center justify-between w-full pt-4">
+                <Button variant="outline" onClick={() => setCurrentStep(5)}>
+                  Back
+                </Button>
+                <Link href="/staff/admin/students">
                   <Button variant="accent">
-                    Complete Setup & View Portal
+                    Complete Setup & View Directory
                   </Button>
                 </Link>
               </div>

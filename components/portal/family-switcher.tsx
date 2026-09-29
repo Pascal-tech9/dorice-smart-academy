@@ -54,12 +54,23 @@ export function FamilySwitcher({ students, activeStudent, onSelectStudent }: Fam
             Family Learner Switcher ({students.length} Enrolled Siblings)
           </div>
           {students.map((student) => {
-            const isSelected = student.id === activeStudent.id;
+            const isSelected =
+              student.id === activeStudent.id ||
+              student.admissionNumber === activeStudent.admissionNumber ||
+              (student.firstName === activeStudent.firstName && student.lastName === activeStudent.lastName);
             return (
               <button
-                key={student.id}
+                key={student.id || student.admissionNumber}
                 type="button"
                 onClick={() => {
+                  try {
+                    localStorage.setItem('dsa_active_student_adm', student.admissionNumber);
+                    const url = new URL(window.location.href);
+                    url.searchParams.set('student', student.admissionNumber);
+                    window.history.replaceState({}, '', url.toString());
+                  } catch (e) {
+                    // Ignore storage errors
+                  }
                   onSelectStudent(student);
                   setOpen(false);
                 }}

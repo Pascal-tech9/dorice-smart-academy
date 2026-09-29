@@ -15,7 +15,8 @@
     "test:tokens": "npm run tokens:check && npm run tokens:contrast",
     "test:rls": "tsx scripts/test-rls.ts",
     "test:webhook": "tsx scripts/test-webhook-concurrency.ts",
-    "test": "npm run test:tokens && npm run test:rls",
+    "test:gate": "tsx scripts/test-results-gate.ts",
+    "test": "npm run test:tokens && npm run test:rls && npm run test:gate",
     "db:reset": "supabase db reset",
     "db:types": "supabase gen types typescript --local > lib/supabase/types.ts"
   },

@@ -4,6 +4,7 @@ import * as React from 'react';
 import Link from 'next/link';
 import { ArrowLeft, CreditCard, DollarSign, Download, Plus, Search, Filter, CheckCircle2, Clock, AlertTriangle, FileText, X } from 'lucide-react';
 import { DEMO_STUDENTS, type StudentRecord } from '@/lib/people/mock-data';
+import { createClient } from '@/lib/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -15,7 +16,7 @@ interface PaymentRecord {
   admissionNumber: string;
   className: string;
   amount: number;
-  method: 'cash' | 'bank_deposit' | 'cheque' | 'mpesa_stk' | 'mpesa_c2b';
+  method: 'cash' | 'bank_deposit' | 'cheque' | 'mpesa_c2b';
   reference: string;
   date: string;
   status: 'completed';
@@ -24,43 +25,32 @@ interface PaymentRecord {
 const INITIAL_PAYMENTS: PaymentRecord[] = [
   {
     id: 'p-1',
-    receiptNumber: 'RCT-2026-0041',
-    studentName: 'Faith Chepkoech',
-    admissionNumber: 'DSA-2026-002',
-    className: 'Grade 4 Red',
+    receiptNumber: 'RCT-2026-0001',
+    studentName: 'Brian Kiprono',
+    admissionNumber: 'DSA/2026/001',
+    className: 'Grade 4 Main',
     amount: 18500,
-    method: 'mpesa_stk',
-    reference: 'QKD82194KL',
+    method: 'mpesa_c2b',
+    reference: 'SDT001928KL1',
     date: '2026-01-14 09:32',
     status: 'completed',
   },
   {
     id: 'p-2',
-    receiptNumber: 'RCT-2026-0040',
-    studentName: 'Victor Kipkemboi',
-    admissionNumber: 'DSA-2026-011',
-    className: 'Grade 7 Blue',
-    amount: 17800,
-    method: 'bank_deposit',
-    reference: 'KCB-SLIP-8921',
+    receiptNumber: 'RCT-2026-0002',
+    studentName: 'Faith Wambui',
+    admissionNumber: 'DSA/2026/002',
+    className: 'Grade 2 Main',
+    amount: 10000,
+    method: 'mpesa_c2b',
+    reference: 'SDT002928KL1',
     date: '2026-01-13 14:15',
-    status: 'completed',
-  },
-  {
-    id: 'p-3',
-    receiptNumber: 'RCT-2026-0039',
-    studentName: 'Brian Kipchirchir',
-    admissionNumber: 'DSA-2026-001',
-    className: 'Grade 4 Red',
-    amount: 6000,
-    method: 'cash',
-    reference: 'CASH-REC-019',
-    date: '2026-01-12 11:20',
     status: 'completed',
   },
 ];
 
 export default function BursarDashboardPage() {
+  const supabase = React.useMemo(() => createClient(), []);
   const [payments, setPayments] = React.useState<PaymentRecord[]>(INITIAL_PAYMENTS);
   const [showPaymentModal, setShowPaymentModal] = React.useState(false);
   const [selectedStudentId, setSelectedStudentId] = React.useState(DEMO_STUDENTS[0].id);
@@ -70,13 +60,54 @@ export default function BursarDashboardPage() {
   const [notes, setNotes] = React.useState('');
   const [receiptSuccess, setReceiptSuccess] = React.useState<string | null>(null);
 
-  // Statistics calculation
-  const totalBilled = 370000; // 20 learners * ~18,500 - 22,000
-  const totalCollected = payments.reduce((acc, p) => acc + p.amount, 142300);
-  const totalArrears = totalBilled - totalCollected;
-  const collectionPercentage = Math.round((totalCollected / totalBilled) * 100);
+  // Load live payments from Supabase
+  React.useEffect(() => {
+    async function loadLivePayments() {
+      try {
+        const { data, error } = await supabase
+          .from('payments')
+          .select(`
+            id,
+            amount,
+            payment_method,
+            reference_number,
+            paid_by,
+            created_at,
+            receipts ( receipt_number ),
+            students ( id, first_name, last_name, admission_number )
+          `)
+          .order('created_at', { ascending: false });
 
-  const handleRecordPayment = (e: React.FormEvent) => {
+        if (data && data.length > 0) {
+          const mapped: PaymentRecord[] = data.map((p: any) => ({
+            id: p.id,
+            receiptNumber: p.receipts?.[0]?.receipt_number || `RCT-${p.id.slice(0, 8)}`,
+            studentName: p.students ? `${p.students.first_name} ${p.students.last_name}` : p.paid_by || 'Unknown',
+            admissionNumber: p.students?.admission_number || 'N/A',
+            className: 'Grade 4 Main',
+            amount: Number(p.amount) || 0,
+            method: (p.payment_method === 'mpesa' ? 'mpesa_c2b' : p.payment_method) as any,
+            reference: p.reference_number || 'REF-N/A',
+            date: p.created_at ? new Date(p.created_at).toISOString().replace('T', ' ').slice(0, 16) : new Date().toISOString().slice(0, 10),
+            status: 'completed',
+          }));
+          setPayments(mapped);
+        }
+      } catch (err) {
+        console.warn('Using initial payments:', err);
+      }
+    }
+
+    loadLivePayments();
+  }, [supabase]);
+
+  // Statistics calculation
+  const totalBilled = 370000;
+  const totalCollected = payments.reduce((acc, p) => acc + p.amount, 0);
+  const totalArrears = Math.max(0, totalBilled - totalCollected);
+  const collectionPercentage = totalBilled > 0 ? Math.round((totalCollected / totalBilled) * 100) : 0;
+
+  const handleRecordPayment = async (e: React.FormEvent) => {
     e.preventDefault();
     const student = DEMO_STUDENTS.find((s) => s.id === selectedStudentId) || DEMO_STUDENTS[0];
     const amountNum = parseFloat(paymentAmount) || 0;
@@ -96,6 +127,28 @@ export default function BursarDashboardPage() {
     };
 
     setPayments((prev) => [newPayment, ...prev]);
+
+    // Save to Supabase
+    try {
+      const { data: pmt } = await supabase.from('payments').insert({
+        amount: amountNum,
+        payment_method: paymentMethod,
+        reference_number: reference || `MANUAL-${Date.now()}`,
+        paid_by: `${student.firstName} ${student.lastName} Guardian`,
+      }).select().single();
+
+      if (pmt) {
+        await supabase.from('receipts').insert({
+          payment_id: pmt.id,
+          receipt_number: receiptNum,
+          amount: amountNum,
+          issued_to: `${student.firstName} ${student.lastName} Guardian`,
+        });
+      }
+    } catch (err) {
+      console.warn('Payment saved locally, Supabase sync note:', err);
+    }
+
     setReceiptSuccess(`Payment of KES ${amountNum.toLocaleString()} recorded. Receipt ${receiptNum} issued.`);
     setTimeout(() => {
       setShowPaymentModal(false);
