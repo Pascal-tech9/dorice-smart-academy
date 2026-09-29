@@ -1,0 +1,119 @@
+{
+  "meta": {
+    "siteName": "Dorice Smart Academy",
+    "motto": "Inspire, Achieve, Flourish",
+    "location": "Kipkaren River, Kenya"
+  },
+  "nav": {
+    "home": "Home",
+    "about": "About",
+    "gallery": "Gallery",
+    "contact": "Contact",
+    "login": "Parent Login",
+    "portal": "Portal",
+    "fees": "Fees",
+    "results": "Results",
+    "profile": "Profile",
+    "logout": "Log Out"
+  },
+  "portal": {
+    "greeting": "Hello, {name}",
+    "switchChild": "Switch child",
+    "feeBalance": "Fee Balance",
+    "termFee": "Term Fee",
+    "paid": "Paid",
+    "outstanding": "Outstanding",
+    "feesCleared": "Fees Fully Cleared",
+    "payWithMpesa": "Pay with M-PESA",
+    "viewStatement": "View Statement",
+    "viewResults": "View Report Card",
+    "latestResults": "Latest Results",
+    "noResults": "No results published yet",
+    "noInvoices": "No invoices found for this term"
+  },
+  "fees": {
+    "title": "Fee Statement & Receipts",
+    "invoiceItems": "Invoice Items",
+    "payments": "Payments Made",
+    "balance": "Balance Due",
+    "download": "Download Receipt",
+    "payNow": "Pay Now",
+    "receiptNo": "Receipt No.",
+    "date": "Date",
+    "amount": "Amount",
+    "method": "Method",
+    "status": {
+      "paid": "Paid",
+      "partial": "Partial",
+      "unpaid": "Unpaid",
+      "overdue": "Overdue",
+      "credit": "Credit"
+    }
+  },
+  "results": {
+    "title": "Report Card",
+    "selectTerm": "Select Term",
+    "learningArea": "Learning Area",
+    "level": "Level",
+    "score": "Score",
+    "comment": "Teacher Comment",
+    "downloadPdf": "Download PDF",
+    "attendance": "Attendance",
+    "daysPresent": "Days Present",
+    "daysAbsent": "Days Absent",
+    "competencies": "Core Competencies",
+    "values": "Values",
+    "levels": {
+      "EE": "Exceeding Expectations",
+      "ME": "Meeting Expectations",
+      "AE": "Approaching Expectations",
+      "BE": "Below Expectations"
+    },
+    "notPublished": "Results for this term have not been published yet. Check back after the school publishes them.",
+    "feeClearanceRequired": "Please clear outstanding fees to view your child's report card."
+  },
+  "profile": {
+    "title": "My Profile",
+    "fullName": "Full Name",
+    "email": "Email Address",
+    "phone": "Phone Number",
+    "relationship": "Relationship to Child",
+    "children": "My Children",
+    "editProfile": "Edit Profile",
+    "saveChanges": "Save Changes",
+    "changePassword": "Change Password"
+  },
+  "auth": {
+    "login": "Log In",
+    "email": "Email address",
+    "password": "Password",
+    "forgotPassword": "Forgot password?",
+    "sendResetLink": "Send Reset Link",
+    "backToLogin": "Back to login",
+    "inviteOnly": "Access to this portal is by invitation only. Contact the school office to get your access credentials.",
+    "loggingIn": "Logging in…",
+    "resetSent": "Check your email for a password reset link."
+  },
+  "common": {
+    "loading": "Loading…",
+    "error": "Something went wrong. Please try again.",
+    "retry": "Try Again",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "close": "Close",
+    "back": "Back",
+    "next": "Next",
+    "submit": "Submit",
+    "download": "Download",
+    "search": "Search",
+    "filter": "Filter",
+    "export": "Export CSV",
+    "print": "Print",
+    "yes": "Yes",
+    "no": "No",
+    "currency": "KES",
+    "noData": "No data to display"
+  }
+}

@@ -76,7 +76,20 @@ This document records architectural, design, and product decisions made during i
    - Formatted in UI as `Intl.NumberFormat('en-KE', { style: 'currency', currency: 'KES' })`.
 2. **Payment Allocation:**
    - Oldest-first invoice allocation by default. Overpayments roll forward as credit balance.
-3. **M-PESA Idempotency:**
-   - Unique constraints on `MpesaReceiptNumber` and `CheckoutRequestID` prevent double-crediting.
-4. **Unallocated C2B Payments:**
-   - Payments with unparseable or mistyped admission numbers are quarantined into an unallocated queue for bursar manual assignment.
+3. **M-PESA Method — CORRECTION APPLIED (2026-09-29):**
+   - ~~STK Push~~ **REMOVED.** The school uses **Paybill C2B only** (Paybill **400222**).
+   - Parents pay via M-PESA menu: Lipa Na M-Pesa → Paybill → 400222 → account number.
+   - No in-app payment initiation. Payment happens entirely on the parent's phone.
+4. **M-PESA Account Number Format — ⚠️ MUST CONFIRM WITH SCHOOL BEFORE GO-LIVE:**
+   - Current assumption: `369369#StudentName,Grade` (e.g. `369369#JohnDoe,Grade3`)
+   - Open questions:
+     - Is `369369` the correct prefix?
+     - Is it `StudentName,Grade` or just the admission number or a numeric ID?
+     - Duplicate names in same grade → current approach is auto-route to unallocated queue.
+   - Update `lib/mpesa/daraja.ts → parseAccountNumber()` once confirmed.
+5. **M-PESA Idempotency:**
+   - Unique constraint on `mpesa_transactions.receipt_number` prevents double-crediting.
+6. **Unallocated C2B Payments:**
+   - Payments with unparseable, ambiguous, or unmatched account numbers go to the unallocated queue.
+   - Bursar allocates manually; receipt generated retroactively.
+

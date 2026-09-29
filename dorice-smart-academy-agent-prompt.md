@@ -237,21 +237,47 @@ Fee setup:
 - **Invoices** are generated per student per term from the structure, plus adjustments. Balances carry forward as **arrears** across terms.
 - Money is stored as **integer minor units** (KES cents) or `numeric(12,2)`, never floats. Display with `Intl.NumberFormat('en-KE', {style:'currency', currency:'KES'})`.
 
-Payment channels:
-1. **M-PESA STK Push (Daraja / Lipa Na M-PESA Online)**: guardian enters a phone number (default from profile) and amount, gets the prompt on their phone, and the UI polls/subscribes (Supabase Realtime) for confirmation.
-2. **M-PESA Paybill/Till (C2B)**: parents can also pay from the M-PESA menu using the **student's admission number as the account number**. Register C2B validation/confirmation URLs and auto-match by admission number.
-3. **Manual entries by bursar**: cash, bank deposit, cheque, with optional proof upload to Supabase Storage.
+Payment: Paybill C2B (confirmed setup)
+- Paybill: **400222**
+- Account number format: **`369369#StudentName,Grade`** (confirm the exact format with the school — could be admission number, student name+grade, or a different prefix)
+- Parents pay from the M-PESA menu (Lipa Na M-Pesa → Paybill → 400222) and enter the account number.
+- You register a **C2B Confirmation and Validation URL** with Daraja; Safaricom sends the payment callback with the account number.
+- **Manual entries by bursar** (cash, bank deposit, cheque) are entered in the same unified ledger.
 
-Correctness rules (critical):
-- Callbacks/webhooks are **idempotent**: `MpesaReceiptNumber` / transaction id has a **unique constraint**; replays never double-credit.
-- Webhook endpoints respond `200` quickly, verify shape with Zod, use an unguessable secret path segment, and do heavy work after storing the raw payload in `mpesa_transactions` (keep the raw JSON).
-- A **reconciliation job** queries Daraja's Transaction Status API for pending STK requests after a timeout and marks them `succeeded/failed/cancelled`.
-- Unmatched C2B payments (wrong/unknown account number) land in an **"unallocated payments"** queue the bursar can allocate manually.
-- Allocate payments to invoices oldest-first by default (configurable); support overpayment as **credit**.
-- Every payment produces a numbered **receipt** (sequential, per-year, no gaps), PDF-downloadable and emailable/SMS-able.
-- Provide **statements** (per student, date range) and a **fee-collection dashboard** (collected vs expected per class/term, top arrears, daily M-PESA feed) with CSV export.
-- All Daraja credentials live in server env vars. Sandbox vs production selectable by env. Never expose keys to the client. Include a **sandbox test harness** and a documented go-live checklist (Paybill/Till, shortcode, passkey, callback URLs on HTTPS).
-- Optional reminders (email/SMS) for upcoming and overdue balances, feature-flagged.
+Backend workflow (critical):
+
+1. **C2B Callback handling:**
+   - Register two URLs with Daraja for Paybill 400222:
+     - **Validation URL** (GET): respond `{"ResultCode": 0, "ResultDesc": "Success"}` to every request (accept all; filter your end).
+     - **Confirmation URL** (POST): receive full payment details, parse, match to a student, record.
+   - Both use an **unguessable secret path segment**. Save the raw JSON in `mpesa_transactions` before processing.
+
+2. **Matching and parsing:**
+   - Extract the account number (e.g., `369369#JohnDoe,Grade3`). Parse to get student name and grade.
+   - Query DB: find a student with that name and grade level.
+   - If **no match or ambiguous** (duplicate name in same grade): land payment in **"unallocated payments"** queue.
+   - If **unique match**: auto-allocate to that student's oldest unpaid invoices.
+
+3. **Idempotency and reconciliation:**
+   - `mpesa_transactions.receipt_number UNIQUE NOT NULL`. Replay callbacks are silently ignored — never double-credit.
+   - Nightly reconciliation job queries Daraja's `QueryTransaction` API to catch callbacks that never arrived.
+   - Mark reconciled transactions `status='succeeded'`.
+
+4. **Receipts and statements:**
+   - Every payment produces a numbered **receipt** (sequential, per-year, no gaps), PDF-downloadable. Include Paybill 400222, account number, amount, M-PESA reference, timestamp.
+   - Statements per student (date range); Bursar dashboard shows fee-collection summary (collected vs expected), top arrears, daily Paybill feed (all payments matched/unmatched), CSV export.
+
+5. **Unallocated payments queue:**
+   - Bursar sees: phone number, amount, M-PESA reference, account number as entered, timestamp.
+   - Bursar manually selects a student and allocates. On allocation, generate receipt retroactively.
+
+6. **Secrets and go-live:**
+   - Paybill **400222** passkey (PIN) and consumer key/secret live in server env vars only. Never expose to the browser.
+   - Sandbox vs. production selectable by env. Go-live checklist must verify: Validation URL registered and tested; Confirmation URL tested; signature verification working; Paybill 400222 real-phone test; bursar trained on unallocated queue; reconciliation job scheduled.
+
+7. **Optional features (phase 4+):**
+   - SMS confirmations to parent after payment (Daraja provides phone number in callback).
+   - Fee reminders (email/SMS) for arrears — feature-flagged.
 
 ---
 
@@ -304,7 +330,7 @@ Global: role-aware navigation, empty and error states with helpful copy, toasts,
 - Plain, kind language ("You have KES 12,500 to pay this term"). Avoid jargon.
 - Performance: Lighthouse mobile >= 90 on public pages; keep JS bundle small; server components by default; lazy-load heavy client widgets (mark grid, charts).
 - Accessibility: WCAG 2.2 AA, keyboard navigable, visible focus rings (marigold-strong), labelled inputs, `aria-live` for payment status.
-- Empty/edge cases: no invoices yet, unpublished results, failed or cancelled STK push, duplicate callbacks, partial payments, sibling accounts, term rollover.
+- Empty/edge cases: no invoices yet, unpublished results, duplicate callbacks, unallocated payments, partial payments, sibling accounts, term rollover.
 - Error handling: never show raw errors to users. Log with correlation ids.
 
 ---
@@ -312,7 +338,7 @@ Global: role-aware navigation, empty and error states with helpful copy, toasts,
 ## 13. Repo hygiene and documentation
 
 - Clear folder structure (`app/`, `components/`, `lib/`, `server/`, `supabase/migrations/`, `docs/`), ESLint + Prettier, strict TS, absolute imports, commit-ready scripts (`dev`, `build`, `lint`, `test`, `db:reset`, `db:types`).
-- Deliver: `README.md` (setup in under 10 minutes), `.env.example`, `ASSUMPTIONS.md`, `docs/design-tokens.md` (tokens, contrast table, 60-30-10 checklist), `docs/mpesa-go-live.md`, `docs/compliance.md`, `docs/roles-and-rls.md`.
+- Deliver: `README.md` (setup in under 10 minutes), `.env.example`, `ASSUMPTIONS.md`, `docs/design-tokens.md` (tokens, contrast table, 60-30-10 checklist), `docs/mpesa-go-live.md` (Paybill 400222 C2B checklist), `docs/compliance.md`, `docs/roles-and-rls.md`.
 - CI (GitHub Actions): typecheck, lint, unit tests, migration check.
 
 ---
@@ -323,7 +349,7 @@ Global: role-aware navigation, empty and error states with helpful copy, toasts,
 1. **Auth and setup**: Supabase project wiring, invite-only auth, roles, RLS scaffolding + tests, admin setup wizard (year, terms, grade levels, classes, learning areas).
 2. **People**: students, guardians, links, enrollments, CSV import, guardian family switcher.
 3. **Fees (manual first)**: fee structures, invoices, adjustments, manual payments, allocation, receipts (PDF), statements, bursar dashboard.
-4. **M-PESA**: STK Push, C2B, callbacks, idempotency, reconciliation, unallocated queue, sandbox harness, go-live doc.
+4. **M-PESA**: C2B Paybill 400222 callbacks, idempotency, reconciliation, unallocated queue, sandbox harness, go-live doc.
 5. **CBC results**: grading schemes, assessment setup, mark-entry grid, term results, comments, approval/publish flow, report card PDF, analytics.
 6. **Parent polish and notifications**: results and fees UI polish, email (Resend), optional SMS, reminders, PWA install, Kiswahili scaffolding.
 7. **Hardening**: security review, RLS penetration tests, load test of webhooks, accessibility audit, Lighthouse pass, backup/restore drill, handover docs.

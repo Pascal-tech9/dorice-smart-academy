@@ -1,0 +1,51 @@
+{
+  "name": "Dorice Smart Academy",
+  "short_name": "Dorice SA",
+  "description": "Parent portal for fees and report cards — Dorice Smart Academy",
+  "start_url": "/portal",
+  "display": "standalone",
+  "background_color": "#F7F0E1",
+  "theme_color": "#123F70",
+  "orientation": "portrait-primary",
+  "categories": ["education"],
+  "lang": "en-KE",
+  "icons": [
+    {
+      "src": "/brand/pwa-icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/brand/pwa-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/brand/screenshot-portal.png",
+      "sizes": "360x780",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Parent portal — fee balance and M-PESA payment"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Pay Fees",
+      "short_name": "Pay",
+      "description": "Go to fee payment",
+      "url": "/portal/fees",
+      "icons": [{ "src": "/brand/pwa-icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "View Results",
+      "short_name": "Results",
+      "description": "View report cards",
+      "url": "/portal/results",
+      "icons": [{ "src": "/brand/pwa-icon-192.png", "sizes": "192x192" }]
+    }
+  ]
+}

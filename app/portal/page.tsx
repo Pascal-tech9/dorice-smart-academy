@@ -7,6 +7,7 @@ import { CreditCard, Award, ArrowRight, Calendar, User, Phone, CheckCircle2, Ale
 import { DEMO_STUDENTS, type StudentRecord } from '@/lib/people/mock-data';
 import { FamilySwitcher } from '@/components/portal/family-switcher';
 import { MpesaPaymentModal } from '@/components/portal/mpesa-payment-modal';
+import { PwaInstallBanner } from '@/components/portal/pwa-install-banner';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -63,6 +64,13 @@ export default function GuardianPortalPage() {
               onSelectStudent={setActiveStudent}
             />
 
+            <Link
+              href="/portal/profile"
+              aria-label="My Profile"
+              className="text-fluid-xs font-bold text-primary-fg opacity-80 hover:opacity-100 px-3 py-1.5 rounded-[8px] hover:bg-primary-hover transition-colors hidden sm:block"
+            >
+              My Profile
+            </Link>
             <Link
               href="/"
               className="text-fluid-xs font-bold text-primary-fg opacity-80 hover:opacity-100 px-3 py-1.5 rounded-[8px] hover:bg-primary-hover transition-colors"
@@ -256,6 +264,9 @@ export default function GuardianPortalPage() {
           }));
         }}
       />
+
+      {/* PWA Install Banner — Android/Chrome only */}
+      <PwaInstallBanner />
     </div>
   );
 }

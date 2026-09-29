@@ -6,9 +6,17 @@ export const metadata: Metadata = {
   title: 'Dorice Smart Academy | Inspire, Achieve, Flourish',
   description:
     'Dorice Smart Academy school portal in Kipkaren River, Kenya. Secure fee management, M-PESA payments, and Competency Based Curriculum (CBC) assessment report cards.',
+  manifest: '/manifest.json',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'default',
+    title: 'Dorice SA',
+  },
+  formatDetection: { telephone: false },
   icons: {
     icon: '/brand/dorice-logo-badge.png',
     apple: '/brand/dorice-logo-badge.png',
+    shortcut: '/brand/dorice-logo-badge.png',
   },
 };
 

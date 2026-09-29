@@ -1,0 +1,119 @@
+{
+  "meta": {
+    "siteName": "Dorice Smart Academy",
+    "motto": "Inspire, Achieve, Flourish",
+    "location": "Mto wa Kipkaren, Kenya"
+  },
+  "nav": {
+    "home": "Nyumbani",
+    "about": "Kuhusu",
+    "gallery": "Picha",
+    "contact": "Wasiliana",
+    "login": "Ingia (Mzazi)",
+    "portal": "Lango",
+    "fees": "Ada",
+    "results": "Matokeo",
+    "profile": "Wasifu",
+    "logout": "Toka"
+  },
+  "portal": {
+    "greeting": "Karibu, {name}",
+    "switchChild": "Badilisha mtoto",
+    "feeBalance": "Salio la Ada",
+    "termFee": "Ada ya Muhula",
+    "paid": "Imelipwa",
+    "outstanding": "Deni",
+    "feesCleared": "Ada Imelipwa Kikamilifu",
+    "payWithMpesa": "Lipa kwa M-PESA",
+    "viewStatement": "Tazama Taarifa",
+    "viewResults": "Tazama Ripoti ya Mtoto",
+    "latestResults": "Matokeo ya Hivi Karibuni",
+    "noResults": "Matokeo bado hayajachapishwa",
+    "noInvoices": "Hakuna ankara kwa muhula huu"
+  },
+  "fees": {
+    "title": "Taarifa ya Ada na Risiti",
+    "invoiceItems": "Vitu vya Ankara",
+    "payments": "Malipo Yaliyofanywa",
+    "balance": "Salio Inayobaki",
+    "download": "Pakua Risiti",
+    "payNow": "Lipa Sasa",
+    "receiptNo": "Nambari ya Risiti",
+    "date": "Tarehe",
+    "amount": "Kiasi",
+    "method": "Njia",
+    "status": {
+      "paid": "Imelipwa",
+      "partial": "Sehemu",
+      "unpaid": "Haijalipiwa",
+      "overdue": "Imechelewa",
+      "credit": "Ziada"
+    }
+  },
+  "results": {
+    "title": "Ripoti ya Mwanafunzi",
+    "selectTerm": "Chagua Muhula",
+    "learningArea": "Eneo la Kujifunza",
+    "level": "Kiwango",
+    "score": "Alama",
+    "comment": "Maoni ya Mwalimu",
+    "downloadPdf": "Pakua PDF",
+    "attendance": "Mahudhurio",
+    "daysPresent": "Siku za Kuhudhuria",
+    "daysAbsent": "Siku za Kutokuwepo",
+    "competencies": "Uwezo Mkuu",
+    "values": "Maadili",
+    "levels": {
+      "EE": "Inazidi Matarajio",
+      "ME": "Inakidhi Matarajio",
+      "AE": "Inakaribia Matarajio",
+      "BE": "Chini ya Matarajio"
+    },
+    "notPublished": "Matokeo ya muhula huu bado hayajachapishwa. Angalia tena baada ya shule kuyachapisha.",
+    "feeClearanceRequired": "Tafadhali lipa ada zilizobaki ili uweze kuona ripoti ya mtoto wako."
+  },
+  "profile": {
+    "title": "Wasifu Wangu",
+    "fullName": "Jina Kamili",
+    "email": "Barua pepe",
+    "phone": "Nambari ya Simu",
+    "relationship": "Uhusiano na Mtoto",
+    "children": "Watoto Wangu",
+    "editProfile": "Hariri Wasifu",
+    "saveChanges": "Hifadhi Mabadiliko",
+    "changePassword": "Badilisha Nenosiri"
+  },
+  "auth": {
+    "login": "Ingia",
+    "email": "Barua pepe",
+    "password": "Nenosiri",
+    "forgotPassword": "Umesahau nenosiri?",
+    "sendResetLink": "Tuma Kiungo cha Kuweka Upya",
+    "backToLogin": "Rudi kwenye kuingia",
+    "inviteOnly": "Ufikiaji wa lango hili ni kwa mwaliko tu. Wasiliana na ofisi ya shule kupata akaunti yako.",
+    "loggingIn": "Inaingia…",
+    "resetSent": "Angalia barua pepe yako kwa kiungo cha kuweka upya nenosiri."
+  },
+  "common": {
+    "loading": "Inapakia…",
+    "error": "Hitilafu imetokea. Tafadhali jaribu tena.",
+    "retry": "Jaribu Tena",
+    "cancel": "Ghairi",
+    "save": "Hifadhi",
+    "delete": "Futa",
+    "edit": "Hariri",
+    "close": "Funga",
+    "back": "Rudi",
+    "next": "Endelea",
+    "submit": "Wasilisha",
+    "download": "Pakua",
+    "search": "Tafuta",
+    "filter": "Chuja",
+    "export": "Hamisha CSV",
+    "print": "Chapisha",
+    "yes": "Ndiyo",
+    "no": "Hapana",
+    "currency": "KES",
+    "noData": "Hakuna data ya kuonyesha"
+  }
+}
