@@ -6,14 +6,18 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "eslint app components lib",
+    "typecheck": "tsc --noEmit",
     "tokens:generate": "tsx scripts/generate-palette.ts",
     "tokens:export": "tsx scripts/export-tokens.ts",
     "tokens:check": "tsx scripts/check-token-enforcement.ts",
     "tokens:contrast": "tsx scripts/check-contrast.ts",
     "test:tokens": "npm run tokens:check && npm run tokens:contrast",
     "test:rls": "tsx scripts/test-rls.ts",
-    "test": "npm run test:tokens && npm run test:rls"
+    "test:webhook": "tsx scripts/test-webhook-concurrency.ts",
+    "test": "npm run test:tokens && npm run test:rls",
+    "db:reset": "supabase db reset",
+    "db:types": "supabase gen types typescript --local > lib/supabase/types.ts"
   },
   "dependencies": {
     "@react-pdf/renderer": "^4.9.0",
