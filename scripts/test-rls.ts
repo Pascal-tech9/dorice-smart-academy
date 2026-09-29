@@ -49,6 +49,15 @@ export function verifyRlsPolicies() {
     'payments',
     'payment_allocations',
     'receipts',
+
+    // Migration 003: M-PESA Daraja
+    'mpesa_transactions',
+
+    // Migration 004: CBC Academic Assessments & Reports
+    'assessments',
+    'assessment_scores',
+    'term_reports',
+    'term_report_learning_areas',
   ];
 
   let errors = 0;
@@ -106,11 +115,21 @@ export function verifyRlsPolicies() {
     errors++;
   }
 
+  // 5. Verify CBC Academic RLS Isolation (Published reports only for guardians)
+  console.log('\nVerifying CBC Academic Isolation Policies...');
+  const cbcPolicy = /CREATE\s+POLICY\s+"Guardians can view published term reports of their children"\s+ON\s+term_reports/i;
+  if (cbcPolicy.test(combinedSql)) {
+    console.log('✓ [PASS] Guardian CBC published report isolation policy verified.');
+  } else {
+    console.error('✗ [FAIL] Missing guardian CBC published report isolation policy on term_reports.');
+    errors++;
+  }
+
   if (errors > 0) {
     console.error(`\nFAILED: ${errors} RLS policy verification failures found!`);
     process.exit(1);
   } else {
-    console.log(`\nALL RLS VERIFICATION CHECKS PASSED: 24 tables secured, default-deny active, financial policies validated.`);
+    console.log(`\nALL RLS VERIFICATION CHECKS PASSED: 28 tables secured, default-deny active, financial and academic policies validated.`);
   }
 }
 
