@@ -11,13 +11,18 @@
     "tokens:export": "tsx scripts/export-tokens.ts",
     "tokens:check": "tsx scripts/check-token-enforcement.ts",
     "tokens:contrast": "tsx scripts/check-contrast.ts",
-    "test:tokens": "npm run tokens:check && npm run tokens:contrast"
+    "test:tokens": "npm run tokens:check && npm run tokens:contrast",
+    "test:rls": "tsx scripts/test-rls.ts",
+    "test": "npm run test:tokens && npm run test:rls"
   },
   "dependencies": {
+    "@supabase/ssr": "^0.12.7",
+    "@supabase/supabase-js": "^2.117.2",
     "lucide-react": "^1.48.0",
     "next": "16.3.6",
     "react": "19.2.8",
-    "react-dom": "19.2.8"
+    "react-dom": "19.2.8",
+    "zod": "^4.6.5"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
