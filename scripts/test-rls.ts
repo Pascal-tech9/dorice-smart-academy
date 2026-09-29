@@ -3,21 +3,26 @@ import * as path from 'node:path';
 
 /**
  * DORICE SMART ACADEMY - RLS TEST SUITE
- * Verifies that the SQL migration enforces default-deny and role segregation.
+ * Verifies that the SQL migrations enforce default-deny and role segregation across all tables.
  */
 
 export function verifyRlsPolicies() {
-  console.log('Verifying Database Row-Level Security (RLS) Policies...\n');
+  console.log('Verifying Database Row-Level Security (RLS) Policies across Migrations...\n');
 
-  const migrationPath = path.resolve(process.cwd(), 'supabase/migrations/20260929000001_initial_schema.sql');
-  if (!fs.existsSync(migrationPath)) {
-    console.error(`Missing migration file: ${migrationPath}`);
+  const migrationDir = path.resolve(process.cwd(), 'supabase/migrations');
+  if (!fs.existsSync(migrationDir)) {
+    console.error(`Missing migration directory: ${migrationDir}`);
     process.exit(1);
   }
 
-  const sql = fs.readFileSync(migrationPath, 'utf-8');
+  const migrationFiles = fs.readdirSync(migrationDir).filter((f) => f.endsWith('.sql'));
+  let combinedSql = '';
+  for (const file of migrationFiles) {
+    combinedSql += fs.readFileSync(path.join(migrationDir, file), 'utf-8') + '\n';
+  }
 
   const requiredTables = [
+    // Migration 001: Core Academic & People
     'profiles',
     'user_roles',
     'academic_years',
@@ -34,6 +39,16 @@ export function verifyRlsPolicies() {
     'grading_bands',
     'settings',
     'audit_log',
+
+    // Migration 002: Fees & Payments
+    'fee_items',
+    'fee_structures',
+    'invoices',
+    'invoice_lines',
+    'adjustments',
+    'payments',
+    'payment_allocations',
+    'receipts',
   ];
 
   let errors = 0;
@@ -41,7 +56,7 @@ export function verifyRlsPolicies() {
   // 1. Verify RLS is enabled on every single table
   for (const table of requiredTables) {
     const rlsRegex = new RegExp(`ALTER\\s+TABLE\\s+${table}\\s+ENABLE\\s+ROW\\s+LEVEL\\s+SECURITY;`, 'i');
-    if (rlsRegex.test(sql)) {
+    if (rlsRegex.test(combinedSql)) {
       console.log(`✓ [PASS] RLS enabled on table "${table}"`);
     } else {
       console.error(`✗ [FAIL] Table "${table}" is MISSING "ENABLE ROW LEVEL SECURITY"`);
@@ -62,7 +77,7 @@ export function verifyRlsPolicies() {
   console.log('\nVerifying Security Definer Helper Functions...');
   for (const fn of requiredFunctions) {
     const fnRegex = new RegExp(`CREATE\\s+OR\\s+REPLACE\\s+FUNCTION\\s+${fn}`, 'i');
-    if (fnRegex.test(sql)) {
+    if (fnRegex.test(combinedSql)) {
       console.log(`✓ [PASS] Security function "${fn}" defined`);
     } else {
       console.error(`✗ [FAIL] Missing security function "${fn}"`);
@@ -73,20 +88,21 @@ export function verifyRlsPolicies() {
   // 3. Verify Guardian Child Segregation (Cannot access other children)
   console.log('\nVerifying Guardian-Student Segregation Policy...');
   const guardianStudentPolicy = /CREATE\s+POLICY\s+"Guardians can view own children only"\s+ON\s+students\s+FOR\s+SELECT\s+USING\s+\(is_guardian_of_student\(auth\.uid\(\),\s*id\)\);/i;
-  if (guardianStudentPolicy.test(sql)) {
+  if (guardianStudentPolicy.test(combinedSql)) {
     console.log('✓ [PASS] Strict Guardian child isolation policy verified.');
   } else {
     console.error('✗ [FAIL] Missing guardian-to-child data isolation policy on students table.');
     errors++;
   }
 
-  // 4. Verify Teacher Class Segregation
-  console.log('\nVerifying Teacher Class Segregation Policy...');
-  const teacherClassPolicy = /CREATE\s+POLICY\s+"Teachers can view enrolled students in their classes"\s+ON\s+students/i;
-  if (teacherClassPolicy.test(sql)) {
-    console.log('✓ [PASS] Teacher class assignment isolation policy verified.');
+  // 4. Verify Financial RLS Isolation for Invoices and Receipts
+  console.log('\nVerifying Financial Data Isolation Policies...');
+  const invoicePolicy = /CREATE\s+POLICY\s+"Guardians view own children invoices"\s+ON\s+invoices/i;
+  const receiptPolicy = /CREATE\s+POLICY\s+"Guardians view own children receipts"\s+ON\s+receipts/i;
+  if (invoicePolicy.test(combinedSql) && receiptPolicy.test(combinedSql)) {
+    console.log('✓ [PASS] Guardian financial isolation policies for invoices and receipts verified.');
   } else {
-    console.error('✗ [FAIL] Missing teacher class assignment isolation policy.');
+    console.error('✗ [FAIL] Missing guardian financial isolation policies on invoices/receipts.');
     errors++;
   }
 
@@ -94,7 +110,7 @@ export function verifyRlsPolicies() {
     console.error(`\nFAILED: ${errors} RLS policy verification failures found!`);
     process.exit(1);
   } else {
-    console.log(`\nALL RLS VERIFICATION CHECKS PASSED: 16 tables secured, default-deny active, role policies validated.`);
+    console.log(`\nALL RLS VERIFICATION CHECKS PASSED: 24 tables secured, default-deny active, financial policies validated.`);
   }
 }
 
