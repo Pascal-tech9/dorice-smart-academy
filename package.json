@@ -1,0 +1,36 @@
+{
+  "name": "dorice-smart-academy",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "tokens:generate": "tsx scripts/generate-palette.ts",
+    "tokens:export": "tsx scripts/export-tokens.ts",
+    "tokens:check": "tsx scripts/check-token-enforcement.ts",
+    "tokens:contrast": "tsx scripts/check-contrast.ts",
+    "test:tokens": "npm run tokens:check && npm run tokens:contrast"
+  },
+  "dependencies": {
+    "lucide-react": "^1.48.0",
+    "next": "16.3.6",
+    "react": "19.2.8",
+    "react-dom": "19.2.8"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4",
+    "@types/culori": "^4.0.1",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "culori": "^4.0.2",
+    "eslint": "^9",
+    "eslint-config-next": "16.3.6",
+    "sharp": "^0.35.5",
+    "tailwindcss": "^4",
+    "tsx": "^4.23.15",
+    "typescript": "^5"
+  }
+}

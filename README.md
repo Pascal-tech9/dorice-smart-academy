@@ -1,71 +1,82 @@
-# Dorice Smart Academy — Flask web app
+# Dorice Smart Academy — School Portal
 
-A Flask web app for **Dorice Smart Academy** (Lumakanda, Kakamega County, PP1 – Grade 9).
-Follows the **Kenyan CBC curriculum** and uses a "Safety First" approach.
+> **Motto:** *"Inspire, Achieve, Flourish"*  
+> **Location:** Kipkaren River, Kenya • P.O. Box 204
 
-## Stack
-- Flask + Flask-Bootstrap (Large App Structure, blueprints)
-- SQLAlchemy + Flask-Login
-- Jinja2 templates with the same forest-green / gold look as the static site
+A production-quality school portal for **Dorice Smart Academy**, engineered for two core missions:
+1. **School Fee Management & Payment:** Invoices, Lipa Na M-PESA STK Push, C2B Paybill/Till integration, automated receipts, statements, and arrears tracking.
+2. **Student Grades & Report Cards:** Competency Based Curriculum (CBC) assessment tracking, continuous teacher mark entry, values ratings, and branded PDF report cards.
 
-## Directory layout
-```
-dorice/
-├── run.py                  # dev entrypoint
-├── wsgi.py                 # gunicorn entrypoint
-├── config.py
-├── requirements.txt
-└── app/
-    ├── __init__.py         # app factory
-    ├── extensions.py       # db, login_manager, csrf, bootstrap
-    ├── models.py           # User, Assessment
-    ├── seed.py             # demo users + CBC assessments
-    ├── main/routes.py      # /        -> home (Daily Pulse, calendar, gallery)
-    ├── auth/routes.py      # /auth/*  -> register, login, records
-    ├── admissions/routes.py# /admissions  -> 4-step process
-    ├── results/routes.py   # /results -> fees-gated CBC results
-    ├── resources/routes.py # /resources   -> Modern Notes + JS Computer Studies
-    ├── templates/
-    │   ├── base.html
-    │   ├── index.html
-    │   ├── auth/{login,register,records}.html
-    │   ├── admissions/index.html
-    │   ├── results/{index,payment_reminder}.html
-    │   ├── resources/index.html
-    │   └── errors/{404,413}.html
-    ├── static/
-    │   ├── css/style.css
-    │   ├── js/main.js
-    │   └── img/             # gallery-1..6.jpg, hero.jpg, etc.
-    └── uploads/records/    # admission record uploads
-```
+---
 
-## Run locally
+## Quickstart (Under 10 Minutes)
+
+### 1. Prerequisites
+- **Node.js**: v20+ (tested on Node v24)
+- **npm**: v10+
+
+### 2. Installation
 ```bash
-python -m venv .venv && source .venv/bin/activate
-pip install -r requirements.txt
-python run.py
-# open http://127.0.0.1:5000
+git clone <repo-url>
+cd dorice-smart-academy
+npm install
 ```
 
-## Demo accounts (password: `demo123`)
-- `parent@dorice.test`   — fees cleared (full CBC results)
-- `arrears@dorice.test`  — fees due (redirected to payment reminder)
+### 3. Environment Setup
+```bash
+cp .env.example .env.local
+```
+Update `.env.local` with your Supabase, Safaricom Daraja, and Resend keys.
 
-## Key behavior the spec asked for
-1. **Base template** — `base.html` uses Flask-Bootstrap, includes the navbar
-   (Home, Admissions, Results, Learning Resources) and a footer with
-   phone `0115 622615` and location `3.6km from Lumakanda town`.
-2. **Home** — `index.html` has a "Daily Pulse" sidebar (gates `07:00 – 16:30`,
-   assembly 7:40, games 15:30), a 2026 calendar table, and a 6-image
-   gallery (`assets/img/gallery-1.jpg` … `gallery-6.jpg`).
-3. **Admissions** — 4-step process: Call Office → Submit Records → Meet Teacher → Enroll.
-4. **User model** — `User` with `fees_cleared` boolean and fields
-   for `birth_certificate` + `immunization_card` uploads.
-5. **Results gate** — `results/routes.py`:
-   ```python
-   if current_user.fees_cleared == False:
-       return redirect(url_for("results.payment_reminder"))
-   ```
-6. **Learning Resources** — Junior Secondary (Gr 7–9) Computer Studies
-   and pre-technical studies each have their own section.
+### 4. Running the Development Server
+```bash
+npm run dev
+```
+Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+---
+
+## Design System & 60-30-10 Rule
+
+This application strictly implements the **60-30-10 Design Ratio**:
+- **60% Dominant Canvas:** Warm cream background (`#F7F0E1`), clean white card bodies, and navy-ink text (`#10243C`).
+- **30% Structural Frame:** School Navy (`#123F70`) for header navigation, section headlines, and primary buttons.
+- **10% Signature Accent:** Marigold-strong (`#C4530F`) reserved for the single primary call to action per view (*Pay with M-PESA*, *Sign In*).
+
+### Design Token Commands
+```bash
+# Generate tokens CSS and OKLCH scales
+npm run tokens:generate
+
+# Export typed tokens for React-PDF & Resend emails
+npm run tokens:export
+
+# Run automated token linter (bans raw hex & default Tailwind classes)
+npm run tokens:check
+
+# Run WCAG AA contrast verification suite (18 automated checks)
+npm run tokens:contrast
+
+# Run complete token test suite
+npm run test:tokens
+```
+
+---
+
+## Key Routes
+
+- `/` — Public Home Page (arch hero, quick facts, our learners, leadership welcome)
+- `/about` — Academy Mission, Vision, Core Values, and Staff
+- `/gallery` — School Gallery (curated approved photos with DPA 2019 compliance)
+- `/contact` — Office Location (Kipkaren River), WhatsApp inquiry, and office hours
+- `/privacy` — Statutory Kenya Data Protection Act 2019 compliance notice
+- `/login` — Portal Sign-in with blue-plaid panel, demo role selector, and invite-only policy
+- `/design/tokens` — Interactive design system inspector, token swatches, and 60-30-10 ratio tester (dev-only)
+
+---
+
+## Documentation
+
+- [`ASSUMPTIONS.md`](./ASSUMPTIONS.md) — Architectural and design decision log.
+- [`docs/design-tokens.md`](./docs/design-tokens.md) — Complete token registry, contrast tables, and 60-30-10 review checklist.
+- [`dorice-smart-academy-agent-prompt.md`](./dorice-smart-academy-agent-prompt.md) — Master product specification.
