@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { ArrowLeft, CreditCard, Download, FileText, CheckCircle2, Clock, AlertTriangle, ShieldCheck } from 'lucide-react';
 import { DEMO_STUDENTS, type StudentRecord } from '@/lib/people/mock-data';
 import { FamilySwitcher } from '@/components/portal/family-switcher';
+import { MpesaPaymentModal } from '@/components/portal/mpesa-payment-modal';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -12,6 +13,7 @@ import { Badge } from '@/components/ui/badge';
 export default function GuardianFeesPage() {
   const familyStudents = DEMO_STUDENTS.slice(0, 2);
   const [activeStudent, setActiveStudent] = React.useState<StudentRecord>(familyStudents[0]);
+  const [isPaymentModalOpen, setIsPaymentModalOpen] = React.useState<boolean>(false);
 
   const invoiceItems = [
     { desc: 'Tuition & Academic CBC Materials', amount: 12000 },
@@ -201,7 +203,12 @@ export default function GuardianFeesPage() {
               </p>
             </div>
             <div>
-              <Button variant="accent" size="lg" className="gap-2">
+              <Button
+                variant="accent"
+                size="lg"
+                className="gap-2"
+                onClick={() => setIsPaymentModalOpen(true)}
+              >
                 <CreditCard className="w-5 h-5" />
                 <span>Pay with M-PESA</span>
               </Button>
@@ -210,6 +217,19 @@ export default function GuardianFeesPage() {
         )}
 
       </div>
+
+      {/* M-PESA Payment Modal */}
+      <MpesaPaymentModal
+        isOpen={isPaymentModalOpen}
+        onClose={() => setIsPaymentModalOpen(false)}
+        student={activeStudent}
+        onPaymentSuccess={(_receipt, amountPaid) => {
+          setActiveStudent((prev) => ({
+            ...prev,
+            feeBalance: Math.max(0, prev.feeBalance - amountPaid),
+          }));
+        }}
+      />
     </div>
   );
 }

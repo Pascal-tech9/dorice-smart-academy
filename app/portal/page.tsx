@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { CreditCard, Award, ArrowRight, Calendar, User, Phone, CheckCircle2, AlertCircle, FileText, ChevronRight } from 'lucide-react';
 import { DEMO_STUDENTS, type StudentRecord } from '@/lib/people/mock-data';
 import { FamilySwitcher } from '@/components/portal/family-switcher';
+import { MpesaPaymentModal } from '@/components/portal/mpesa-payment-modal';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -15,6 +16,7 @@ export default function GuardianPortalPage() {
   // Demo family: Mary Wanjiku has 2 children (Brian and Faith)
   const familyStudents = DEMO_STUDENTS.slice(0, 2);
   const [activeStudent, setActiveStudent] = React.useState<StudentRecord>(familyStudents[0]);
+  const [isPaymentModalOpen, setIsPaymentModalOpen] = React.useState<boolean>(false);
 
   const formattedBalance = new Intl.NumberFormat('en-KE', {
     style: 'currency',
@@ -131,7 +133,12 @@ export default function GuardianPortalPage() {
                       Settle your child&apos;s balance instantly via <strong>Lipa Na M-PESA Online (STK Push)</strong>.
                       A receipt SMS and updated statement will be generated automatically.
                     </div>
-                    <Button variant="accent" size="lg" className="w-full gap-2">
+                    <Button
+                      variant="accent"
+                      size="lg"
+                      className="w-full gap-2"
+                      onClick={() => setIsPaymentModalOpen(true)}
+                    >
                       <CreditCard className="w-5 h-5" />
                       <span>Pay {formattedBalance} with M-PESA</span>
                     </Button>
@@ -236,6 +243,19 @@ export default function GuardianPortalPage() {
       <footer className="py-6 text-center text-fluid-xs text-text-muted border-t border-border">
         Dorice Smart Academy School Portal • Kipkaren River, Kenya • Motto: &quot;Inspire, Achieve, Flourish&quot;
       </footer>
+
+      {/* M-PESA Payment Modal */}
+      <MpesaPaymentModal
+        isOpen={isPaymentModalOpen}
+        onClose={() => setIsPaymentModalOpen(false)}
+        student={activeStudent}
+        onPaymentSuccess={(_receipt, amountPaid) => {
+          setActiveStudent((prev) => ({
+            ...prev,
+            feeBalance: Math.max(0, prev.feeBalance - amountPaid),
+          }));
+        }}
+      />
     </div>
   );
 }
